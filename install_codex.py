@@ -28,35 +28,14 @@ MCP_SERVER_NAME = "docuflow"
 MIN_PYTHON = (3, 10)
 CODEX_HOME = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))).expanduser()
 CODEX_SKILLS_DIR = CODEX_HOME / "skills"
-PPT_SKILL_NAME = "ppt-slide-generator"
-PPT_SKILL_DIR = CODEX_SKILLS_DIR / PPT_SKILL_NAME
 
-OPTIONAL_TOOLS = {
-    "pandoc": {
-        "check_cmd": "pandoc --version",
-        "description": "40+ format conversion (docx/pdf/md/html/latex/epub...)",
-        "install_hint": {
-            "Windows": "winget install JohnMacFarlane.Pandoc   or   choco install pandoc",
-            "Darwin":  "brew install pandoc",
-            "Linux":   "sudo apt install pandoc   or   sudo pacman -S pandoc",
-        },
-    },
-    "tesseract": {
-        "check_cmd": "tesseract --version",
-        "description": "OCR text recognition (Chinese/English/Japanese/Korean...)",
-        "install_hint": {
-            "Windows": "winget install UB-Mannheim.TesseractOCR   or   choco install tesseract",
-            "Darwin":  "brew install tesseract tesseract-lang",
-            "Linux":   "sudo apt install tesseract-ocr tesseract-ocr-chi-sim",
-        },
-    },
-}
-
-PPT_SKILL_MD = """---
-name: ppt-slide-generator
-description: Generate single-slide or multi-slide PowerPoint decks from user goals by producing slide HTML and converting it to PPTX with DocuFlow tools. Use when users ask to create PPT/PPTX presentations, meeting decks, pitch/report slides, or to turn outlines/content into visual slides.
----
-
+CODEX_SKILLS = {
+    "ppt-slide-generator": {
+        "display_name": "PPT Slide Generator",
+        "short_description": "Generate and polish PPT slides from user goals",
+        "default_prompt": "Use $ppt-slide-generator to design a professional presentation from my outline.",
+        "description": "Generate single-slide or multi-slide PowerPoint decks from user goals by producing slide HTML and converting it to PPTX with DocuFlow tools. Use when users ask to create PPT/PPTX presentations, meeting decks, pitch/report slides, or to turn outlines/content into visual slides.",
+        "content": """\
 # PPT Slide Generator
 
 ## Goal
@@ -114,13 +93,289 @@ After generation:
 - State how many slides were generated.
 - Return exact output paths.
 - Ask whether to revise style, wording, or layout.
-"""
+""",
+    },
+    "report-generator": {
+        "display_name": "Report Generator",
+        "short_description": "Create professional Word reports with templates",
+        "default_prompt": "Use $report-generator to create a professional document.",
+        "description": "Create professional Word documents and reports using DocuFlow tools. Handles template selection, document structure, tables, images, TOC, and PDF export.",
+        "content": """\
+# Report Generator
 
-PPT_SKILL_OPENAI_YAML = """interface:
-  display_name: "PPT Slide Generator"
-  short_description: "Generate and polish PPT slides from user goals"
-  default_prompt: "Use $ppt-slide-generator to design a professional presentation from my outline."
-"""
+## Goal
+Create professional Word documents with proper structure, formatting, and metadata.
+
+## Workflow
+1. Clarify requirements: topic, audience, structure, style, language, output path.
+2. Select template with `template_list_presets`, then `template_create_from_preset`.
+3. Build structure with `heading_add` for each section.
+4. Fill content with `paragraph_add`, `list_add_bullet`/`list_add_numbered`.
+5. Insert data with `table_add` + `table_set_cell`, `image_add` for figures.
+6. Add navigation with `toc_add`, `page_number_add`.
+7. Set metadata with `doc_set_properties`.
+8. Export if needed with `convert` to PDF or other formats.
+
+## Document Structure Patterns
+
+### Business Report
+1. Title page (heading level 0 + subtitle)
+2. Table of Contents
+3. Executive Summary
+4. Background / Introduction
+5. Findings / Analysis (with sub-headings)
+6. Data tables and charts
+7. Recommendations
+8. Appendix
+
+### Technical Document
+1. Title + version info
+2. Table of Contents
+3. Overview
+4. Architecture / Design
+5. Implementation Details (with sub-headings)
+6. Testing / Validation
+7. References
+
+## Formatting Conventions
+- Use `heading_add` with level 1 for main sections, level 2 for sub-sections.
+- Keep paragraphs concise; prefer bullet lists for 3+ related points.
+- Use tables for structured data; set column widths with `table_set_column_width`.
+- Add `page_add_break` before major sections.
+- Use `header_set` / `footer_set` for running headers and page numbers.
+
+## Quality Checklist
+- Heading hierarchy is consistent (no skipped levels).
+- Tables have clear headers and aligned data.
+- TOC is present for documents > 3 pages.
+- Metadata (title, author) is set.
+""",
+    },
+    "excel-dashboard": {
+        "display_name": "Excel Dashboard",
+        "short_description": "Build data dashboards with charts and analysis",
+        "default_prompt": "Use $excel-dashboard to build a data dashboard.",
+        "description": "Build Excel data dashboards with formulas, charts, conditional formatting, pivot tables, and statistical analysis using DocuFlow tools.",
+        "content": """\
+# Excel Dashboard
+
+## Goal
+Build Excel workbooks with data, formulas, charts, and visual analysis.
+
+## Workflow
+1. Clarify requirements: data source, metrics, chart types, audience, output path.
+2. Create workbook with `excel_create` with named sheets.
+3. Input data with `cell_write`; use `data_fill` for series/patterns.
+4. Add formulas with `formula_batch` for bulk calculations.
+5. Visualize with `chart_create` for bar/line/pie/scatter charts.
+6. Format with `conditional_format` for highlights, `cell_format` for styles.
+7. Analyze with `stats_summary` for descriptive stats, `pivot_create` for summaries.
+8. Finalize with `sheet_rename` for clear tab names.
+
+## Sheet Organization
+- Sheet 1: "Raw Data" — source data with headers in row 1
+- Sheet 2: "Calculations" — formulas referencing Raw Data
+- Sheet 3: "Dashboard" — charts + KPI summary cells
+- Sheet 4: "Pivot" — pivot table summaries (optional)
+
+## Chart Types Guide
+- Trend over time → `line`
+- Category comparison → `bar` or `column`
+- Part of whole → `pie` or `doughnut`
+- Correlation → `scatter`
+
+## Tool Notes
+- Use `formula_batch` for efficiency (not repeated `cell_formula`).
+- Use `formula_quick` for single common operations (sum, average, count).
+- Use `named_range` for frequently referenced ranges.
+- Use `data_validate` to add dropdown lists or constraints.
+
+## Quality Checklist
+- All formulas compute correctly.
+- Charts have titles, axis labels, and legends.
+- Number formats are appropriate.
+- Sheet tabs have descriptive names.
+""",
+    },
+    "pdf-toolkit": {
+        "display_name": "PDF Toolkit",
+        "short_description": "Merge, split, encrypt, extract, and annotate PDFs",
+        "default_prompt": "Use $pdf-toolkit to process my PDF documents.",
+        "description": "Perform PDF operations: merge, split, extract pages/text/tables/images, encrypt/decrypt, watermark, redact, fill forms, and convert to editable formats.",
+        "content": """\
+# PDF Toolkit
+
+## Goal
+Perform common PDF manipulation tasks efficiently.
+
+## Workflow
+1. Always start with `pdf_info` to understand the document.
+2. Determine the operation needed.
+3. Execute the appropriate tool(s).
+4. Verify with `pdf_info` on the output.
+5. Report results and output paths.
+
+## Operations
+
+### Extract Content
+- `pdf_extract_text` — get all text (specify page range for large PDFs)
+- `pdf_extract_tables` — get structured table data
+- `pdf_extract_images` — extract embedded images
+- `pdf_get_outline` — get bookmarks/TOC structure
+
+### Manipulate Pages
+- `pdf_merge` — combine multiple PDFs
+- `pdf_split` — split by page ranges
+- `pdf_extract_pages` — pull specific pages
+- `pdf_rotate` — rotate 90/180/270 degrees
+- `pdf_delete_pages` — remove pages
+
+### Annotate & Edit
+- `pdf_add_watermark` — text or image watermark
+- `pdf_text_replace` — find and replace text
+- `pdf_redact` — permanently remove content (irreversible!)
+- `pdf_annotate_text` — add notes/comments
+
+### Security
+- `pdf_encrypt` — add password protection
+- `pdf_decrypt` — remove password (requires current password)
+
+### Forms
+- `pdf_form_get_fields` — list fillable fields
+- `pdf_form_fill` — fill fields by name-value mapping
+
+### Convert
+- `pdf_to_editable` — PDF to Word/Markdown
+- `pdf_tables_to_word` / `pdf_tables_to_excel` — extract tables
+- `pdf_to_text` — plain text extraction
+
+## Error Recovery
+- Encrypted PDF: ask for password, use `pdf_decrypt` first.
+- Empty text: PDF may be scanned images, suggest `ocr_pdf`.
+- Form fill fails: use `pdf_form_get_fields` to verify field names.
+""",
+    },
+    "doc-convert": {
+        "display_name": "Document Converter",
+        "short_description": "Convert between 40+ document formats",
+        "default_prompt": "Use $doc-convert to convert my document.",
+        "description": "Convert documents between 40+ formats (docx/pdf/md/html/latex/epub/odt/rst/pptx/csv...) using DocuFlow and pandoc.",
+        "content": """\
+# Document Converter
+
+## Goal
+Convert documents between formats accurately while preserving structure.
+
+## Workflow
+1. Confirm input file path and format.
+2. Clarify desired output format.
+3. Use `convert_formats` to verify support if uncertain.
+4. Convert with `convert` (single) or `convert_batch` (multiple).
+5. Verify output file exists and is valid.
+6. Report output path and any warnings.
+
+## Common Conversions
+- docx → pdf, md, html, txt, epub, latex, odt, rtf
+- md → docx, pdf, html, epub, latex, pptx, rst
+- html → docx, pdf, md, epub
+- latex → pdf, docx, html, epub
+- xlsx → csv (via `excel_save_as`)
+
+## Tool Selection
+- Single file: `convert`
+- Multiple files: `convert_batch`
+- List formats: `convert_formats`
+- With template styling: `convert_with_template`
+- PDF to editable: `pdf_to_editable` (better than pandoc for PDFs)
+- Scanned PDF: `ocr_pdf` first, then convert
+
+## Template-Based Conversion
+Use `convert_with_template` when converting Markdown to styled docx:
+1. Create reference docx with `template_create_from_preset`.
+2. Pass as template parameter during conversion.
+
+## Tips
+- PDF output requires pandoc + LaTeX; if unavailable, create docx first.
+- Source files should be UTF-8.
+- For images in Markdown, use absolute paths.
+""",
+    },
+    "ocr-extract": {
+        "display_name": "OCR Extractor",
+        "short_description": "Extract text from images and scanned PDFs",
+        "default_prompt": "Use $ocr-extract to extract text from my image or scanned document.",
+        "description": "Extract text from images (png/jpg/tiff) and scanned PDFs using Tesseract OCR. Supports Chinese, English, Japanese, Korean and 100+ languages.",
+        "content": """\
+# OCR Extractor
+
+## Goal
+Extract text from images and scanned documents using OCR.
+
+## Workflow
+1. Identify input type: image file(s) or scanned PDF.
+2. Detect or ask for language (Chinese, English, Japanese, etc.).
+3. Check OCR availability with `ocr_status`.
+4. Run the appropriate OCR tool.
+5. Post-process and deliver results.
+
+## Tool Selection
+- Single image (png/jpg/tiff/bmp): `ocr_image`
+- Multi-page scanned PDF: `ocr_pdf`
+- Scanned PDF to editable Word: `ocr_to_docx`
+- Check installation: `ocr_status`
+
+## Language Codes
+- English: `eng`
+- Simplified Chinese: `chi_sim`
+- Traditional Chinese: `chi_tra`
+- Japanese: `jpn`
+- Korean: `kor`
+- Mixed Chinese+English: `chi_sim+eng`
+
+## Common Workflows
+
+### Image to Text
+1. `ocr_status` → verify Tesseract
+2. `ocr_image(path, language)` → extracted text
+
+### Scanned PDF to Editable Word
+1. `ocr_to_docx(path, language, output_path)` → .docx file
+2. `doc_info` → verify output
+
+## Tips
+- 300 DPI is optimal for OCR accuracy.
+- High contrast (dark text on white) works best.
+- Always specify the correct language code.
+- Use `chi_sim+eng` for mixed Chinese-English documents.
+
+## Error Recovery
+- Tesseract not installed: provide install instructions.
+- Empty result: wrong language or low resolution.
+- PDF has selectable text: use `pdf_extract_text` instead (no OCR needed).
+""",
+    },
+}
+
+OPTIONAL_TOOLS = {
+    "pandoc": {
+        "check_cmd": "pandoc --version",
+        "description": "40+ format conversion (docx/pdf/md/html/latex/epub...)",
+        "install_hint": {
+            "Windows": "winget install JohnMacFarlane.Pandoc   or   choco install pandoc",
+            "Darwin":  "brew install pandoc",
+            "Linux":   "sudo apt install pandoc   or   sudo pacman -S pandoc",
+        },
+    },
+    "tesseract": {
+        "check_cmd": "tesseract --version",
+        "description": "OCR text recognition (Chinese/English/Japanese/Korean...)",
+        "install_hint": {
+            "Windows": "winget install UB-Mannheim.TesseractOCR   or   choco install tesseract",
+            "Darwin":  "brew install tesseract tesseract-lang",
+            "Linux":   "sudo apt install tesseract-ocr tesseract-ocr-chi-sim",
+        },
+    },
+}
 
 TOTAL_STEPS = 7
 
@@ -486,7 +741,7 @@ image_generate, image_generate_for_ppt
 
 
 def install_codex_skill():
-    header(f"Step 6/{TOTAL_STEPS}  Install Codex Skill")
+    header(f"Step 6/{TOTAL_STEPS}  Install Codex Skills")
 
     try:
         CODEX_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
@@ -494,34 +749,52 @@ def install_codex_skill():
         fail(f"Failed to create Codex skills directory: {e}")
         return False
 
-    if PPT_SKILL_DIR.exists():
-        info(f"Skill '{PPT_SKILL_NAME}' already exists at {PPT_SKILL_DIR}")
-        if not ask_yes_no("Overwrite with bundled version?", default=False):
-            return True
+    installed = 0
+    for skill_name, skill_data in CODEX_SKILLS.items():
+        skill_dir = CODEX_SKILLS_DIR / skill_name
+
+        if skill_dir.exists():
+            info(f"Skill '{skill_name}' already exists")
+            if not ask_yes_no(f"Overwrite '{skill_name}'?", default=False):
+                installed += 1
+                continue
+            try:
+                shutil.rmtree(skill_dir)
+            except Exception as e:
+                warn(f"Failed to remove existing '{skill_name}': {e}")
+                continue
+
         try:
-            shutil.rmtree(PPT_SKILL_DIR)
-            info("Removed existing skill directory")
+            agents_dir = skill_dir / "agents"
+            agents_dir.mkdir(parents=True, exist_ok=True)
+
+            # Build SKILL.md with frontmatter
+            skill_md = (
+                f"---\n"
+                f"name: {skill_name}\n"
+                f"description: {skill_data['description']}\n"
+                f"---\n\n"
+                f"{skill_data['content']}"
+            )
+            write_utf8(skill_dir / "SKILL.md", skill_md)
+
+            # Build openai.yaml
+            openai_yaml = (
+                f"interface:\n"
+                f"  display_name: \"{skill_data['display_name']}\"\n"
+                f"  short_description: \"{skill_data['short_description']}\"\n"
+                f"  default_prompt: \"{skill_data['default_prompt']}\"\n"
+            )
+            write_utf8(agents_dir / "openai.yaml", openai_yaml)
+
+            info(f"Skill '{skill_name}' installed")
+            installed += 1
         except Exception as e:
-            fail(f"Failed to remove existing skill directory: {e}")
-            return False
+            warn(f"Failed to install '{skill_name}': {e}")
 
-    try:
-        agents_dir = PPT_SKILL_DIR / "agents"
-        agents_dir.mkdir(parents=True, exist_ok=True)
-        write_utf8(PPT_SKILL_DIR / "SKILL.md", PPT_SKILL_MD)
-        write_utf8(agents_dir / "openai.yaml", PPT_SKILL_OPENAI_YAML)
-    except Exception as e:
-        fail(f"Failed to install skill files: {e}")
-        return False
-
-    # Minimal self-check
-    skill_file = PPT_SKILL_DIR / "SKILL.md"
-    if not skill_file.exists():
-        fail("Skill installation failed: SKILL.md missing")
-        return False
-
-    info(f"Codex skill installed: {PPT_SKILL_DIR}")
-    warn("Restart Codex to pick up new skills.")
+    info(f"{installed}/{len(CODEX_SKILLS)} skills installed to {CODEX_SKILLS_DIR}")
+    if installed > 0:
+        warn("Restart Codex to pick up new skills.")
     return True
 
 
@@ -551,12 +824,16 @@ def verify_installation():
     else:
         warn("Agent instructions: CODEX.md missing")
 
-    # Check Codex skill
-    skill_md = PPT_SKILL_DIR / "SKILL.md"
-    if skill_md.exists():
-        info(f"Skill installed: {PPT_SKILL_NAME}")
+    # Check Codex skills
+    installed_skills = []
+    for skill_name in CODEX_SKILLS:
+        skill_md = CODEX_SKILLS_DIR / skill_name / "SKILL.md"
+        if skill_md.exists():
+            installed_skills.append(skill_name)
+    if installed_skills:
+        info(f"Skills installed: {', '.join(installed_skills)}")
     else:
-        warn(f"Skill missing: {PPT_SKILL_NAME}")
+        warn("No Codex skills found")
 
     print(f"""
   {Color.BOLD}Available modules:{Color.RESET}
@@ -596,13 +873,22 @@ def print_done():
     [package]      docuflow-mcp (pip, editable)
     [mcp server]   codex mcp — docuflow registered
     [agent]        CODEX.md — project-level instructions
-    [skill]        {PPT_SKILL_NAME} — installed to {PPT_SKILL_DIR}
+    [skill]        {len(CODEX_SKILLS)} skills installed to {CODEX_SKILLS_DIR}
+
+  Skills (invoke in Codex):
+    $ppt-slide-generator   Generate HTML-to-PPTX presentations
+    $report-generator      Create professional Word reports
+    $excel-dashboard       Build data dashboards with charts
+    $pdf-toolkit           Merge, split, encrypt, extract PDFs
+    $doc-convert           Convert between 40+ document formats
+    $ocr-extract           OCR text from images and scanned PDFs
 
   Usage:
     codex "Create a Word document with a quarterly report table"
     codex "Convert my report.docx to PDF"
     codex "Add a pie chart to slide 2 of presentation.pptx"
     codex "$ppt-slide-generator Build a 5-slide product pitch deck"
+    codex "$pdf-toolkit Merge and encrypt these three PDFs"
 
   Management:
     codex mcp list              List registered MCP servers
@@ -637,14 +923,19 @@ def uninstall():
             codex_md.unlink()
             info("CODEX.md removed")
 
-    # Remove Codex skill
-    if PPT_SKILL_DIR.exists():
-        if ask_yes_no(f"Remove Codex skill '{PPT_SKILL_NAME}'?", default=True):
-            try:
-                shutil.rmtree(PPT_SKILL_DIR)
-                info(f"Skill '{PPT_SKILL_NAME}' removed")
-            except Exception as e:
-                warn(f"Failed to remove skill directory: {e}")
+    # Remove Codex skills
+    installed_skills = [
+        name for name in CODEX_SKILLS
+        if (CODEX_SKILLS_DIR / name).exists()
+    ]
+    if installed_skills:
+        if ask_yes_no(f"Remove {len(installed_skills)} Codex skills?", default=True):
+            for skill_name in installed_skills:
+                try:
+                    shutil.rmtree(CODEX_SKILLS_DIR / skill_name)
+                except Exception:
+                    pass
+            info(f"Removed {len(installed_skills)} skills")
 
     # Optionally uninstall Python package
     if ask_yes_no("Also uninstall docuflow-mcp Python package?", default=False):

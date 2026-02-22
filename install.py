@@ -53,8 +53,20 @@ OPTIONAL_TOOLS = {
     },
 }
 
+GLOBAL_COMMANDS_DIR = Path.home() / ".claude" / "commands"
+PROJECT_COMMANDS_DIR = DOCUFLOW_DIR / ".claude" / "commands"
+
+SKILL_NAMES = [
+    "ppt-slide-generator",
+    "report-generator",
+    "excel-dashboard",
+    "pdf-toolkit",
+    "doc-convert",
+    "ocr-extract",
+]
+
 # Total step count
-TOTAL_STEPS = 6
+TOTAL_STEPS = 7
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -254,7 +266,7 @@ def configure_mcp_server():
 
 
 def install_agent():
-    header(f"Step 5/{TOTAL_STEPS}  Install Skills & Permissions")
+    header(f"Step 5/{TOTAL_STEPS}  Install Project Skills & Permissions")
 
     claude_dir = DOCUFLOW_DIR / ".claude"
 
@@ -267,19 +279,10 @@ def install_agent():
         _write_agent_instructions(claude_md)
         info("CLAUDE.md created")
 
-    # ── 2. Skills (/ppt-slide-generator, /report-generator, etc.) ──
-    commands_dir = claude_dir / "commands"
-    commands_dir.mkdir(parents=True, exist_ok=True)
-    expected_skills = [
-        "ppt-slide-generator",
-        "report-generator",
-        "excel-dashboard",
-        "pdf-toolkit",
-        "doc-convert",
-        "ocr-extract",
-    ]
-    for skill_name in expected_skills:
-        skill_file = commands_dir / f"{skill_name}.md"
+    # ── 2. Check project-level skills ──
+    PROJECT_COMMANDS_DIR.mkdir(parents=True, exist_ok=True)
+    for skill_name in SKILL_NAMES:
+        skill_file = PROJECT_COMMANDS_DIR / f"{skill_name}.md"
         if skill_file.exists():
             info(f"Skill /{skill_name} ({skill_file.stat().st_size} bytes)")
         else:
@@ -316,8 +319,56 @@ def install_agent():
     return True
 
 
+def install_global_skills():
+    header(f"Step 6/{TOTAL_STEPS}  Install Global Skills")
+
+    if not ask_yes_no(
+        f"Install skills globally to {GLOBAL_COMMANDS_DIR}?\n"
+        "         (makes /ppt-slide-generator etc. available in all projects)",
+        default=True,
+    ):
+        info("Skipped global skill installation")
+        return True
+
+    try:
+        GLOBAL_COMMANDS_DIR.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        fail(f"Failed to create {GLOBAL_COMMANDS_DIR}: {e}")
+        return False
+
+    installed = 0
+    for skill_name in SKILL_NAMES:
+        src = PROJECT_COMMANDS_DIR / f"{skill_name}.md"
+        dst = GLOBAL_COMMANDS_DIR / f"{skill_name}.md"
+
+        if not src.exists():
+            warn(f"Source missing: {src.name} (skipped)")
+            continue
+
+        if dst.exists():
+            # Compare content — skip if identical
+            if src.read_bytes() == dst.read_bytes():
+                info(f"/{skill_name} already up to date")
+                installed += 1
+                continue
+            if not ask_yes_no(f"Overwrite existing /{skill_name}?", default=True):
+                info(f"/{skill_name} kept as-is")
+                installed += 1
+                continue
+
+        try:
+            shutil.copy2(src, dst)
+            info(f"/{skill_name} installed")
+            installed += 1
+        except Exception as e:
+            warn(f"Failed to copy {skill_name}: {e}")
+
+    info(f"{installed}/{len(SKILL_NAMES)} skills installed to {GLOBAL_COMMANDS_DIR}")
+    return True
+
+
 def verify_installation():
-    header(f"Step 6/{TOTAL_STEPS}  Verify Installation")
+    header(f"Step 7/{TOTAL_STEPS}  Verify Installation")
 
     try:
         tool_names = get_tool_names()
@@ -344,11 +395,24 @@ def verify_installation():
     if commands_dir.exists():
         skills = sorted(p.stem for p in commands_dir.glob("*.md"))
         if skills:
-            info(f"Skills: {', '.join('/' + s for s in skills)}")
+            info(f"Project skills: {', '.join('/' + s for s in skills)}")
         else:
             warn("No skills found in .claude/commands/")
     else:
-        warn("Skills directory missing")
+        warn("Project skills directory missing")
+
+    # Check global skills
+    if GLOBAL_COMMANDS_DIR.exists():
+        global_skills = sorted(
+            p.stem for p in GLOBAL_COMMANDS_DIR.glob("*.md")
+            if p.stem in SKILL_NAMES
+        )
+        if global_skills:
+            info(f"Global skills: {', '.join('/' + s for s in global_skills)}")
+        else:
+            info("No DocuFlow skills installed globally")
+    else:
+        info("Global commands directory not present")
 
     print(f"""
   {Color.BOLD}Modules:{Color.RESET}
@@ -456,7 +520,8 @@ def print_done():
     [package]      docuflow-mcp (pip, editable)
     [mcp server]   .mcp.json
     [agent]        CLAUDE.md — project-level instructions
-    [skill]        .claude/commands/ — 6 slash-command skills
+    [skill]        .claude/commands/ — 6 project-level skills
+    [skill]        ~/.claude/commands/ — 6 global skills (if chosen)
     [permissions]  .claude/settings.local.json — all tools auto-allowed
 
   Skills (type in Claude Code):
@@ -527,6 +592,24 @@ def uninstall():
             settings_local.unlink()
             info("Removed settings.local.json")
 
+    # Clean global skills
+    global_skills_found = [
+        GLOBAL_COMMANDS_DIR / f"{name}.md"
+        for name in SKILL_NAMES
+        if (GLOBAL_COMMANDS_DIR / f"{name}.md").exists()
+    ]
+    if global_skills_found:
+        if ask_yes_no(
+            f"Remove {len(global_skills_found)} DocuFlow skills from {GLOBAL_COMMANDS_DIR}?",
+            default=True,
+        ):
+            for skill_file in global_skills_found:
+                try:
+                    skill_file.unlink()
+                except Exception:
+                    pass
+            info(f"Removed {len(global_skills_found)} global skills")
+
     print(f"\n  {Color.GREEN}DocuFlow uninstalled.{Color.RESET}\n")
 
 
@@ -545,6 +628,7 @@ def main():
         check_optional_tools,
         configure_mcp_server,
         install_agent,
+        install_global_skills,
         verify_installation,
     ]
 
