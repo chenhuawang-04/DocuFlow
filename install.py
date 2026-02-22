@@ -267,14 +267,23 @@ def install_agent():
         _write_agent_instructions(claude_md)
         info("CLAUDE.md created")
 
-    # ── 2. PPT Skill (/ppt-slide-generator) ──
+    # ── 2. Skills (/ppt-slide-generator, /report-generator, etc.) ──
     commands_dir = claude_dir / "commands"
     commands_dir.mkdir(parents=True, exist_ok=True)
-    ppt_skill = commands_dir / "ppt-slide-generator.md"
-    if ppt_skill.exists():
-        info(f"PPT skill exists ({ppt_skill.stat().st_size} bytes)")
-    else:
-        warn("PPT skill not found (skipped — not critical)")
+    expected_skills = [
+        "ppt-slide-generator",
+        "report-generator",
+        "excel-dashboard",
+        "pdf-toolkit",
+        "doc-convert",
+        "ocr-extract",
+    ]
+    for skill_name in expected_skills:
+        skill_file = commands_dir / f"{skill_name}.md"
+        if skill_file.exists():
+            info(f"Skill /{skill_name} ({skill_file.stat().st_size} bytes)")
+        else:
+            warn(f"Skill /{skill_name} not found (skipped — not critical)")
 
     # ── 3. settings.local.json — auto-allow all DocuFlow tools ──
     settings_file = claude_dir / "settings.local.json"
@@ -323,13 +332,23 @@ def verify_installation():
         (DOCUFLOW_DIR / ".mcp.json",                         "MCP server config"),
         (DOCUFLOW_DIR / "CLAUDE.md",                          "Agent instructions"),
         (DOCUFLOW_DIR / ".claude" / "settings.local.json",    "Tool permissions"),
-        (DOCUFLOW_DIR / ".claude" / "commands" / "ppt-slide-generator.md", "PPT skill"),
     ]
     for path, label in checks:
         if path.exists():
             info(f"{label}: {path.name}")
         else:
             warn(f"{label}: missing ({path})")
+
+    # Check skills
+    commands_dir = DOCUFLOW_DIR / ".claude" / "commands"
+    if commands_dir.exists():
+        skills = sorted(p.stem for p in commands_dir.glob("*.md"))
+        if skills:
+            info(f"Skills: {', '.join('/' + s for s in skills)}")
+        else:
+            warn("No skills found in .claude/commands/")
+    else:
+        warn("Skills directory missing")
 
     print(f"""
   {Color.BOLD}Modules:{Color.RESET}
@@ -437,8 +456,16 @@ def print_done():
     [package]      docuflow-mcp (pip, editable)
     [mcp server]   .mcp.json
     [agent]        CLAUDE.md — project-level instructions
-    [skill]        .claude/commands/ppt-slide-generator.md
+    [skill]        .claude/commands/ — 6 slash-command skills
     [permissions]  .claude/settings.local.json — all tools auto-allowed
+
+  Skills (type in Claude Code):
+    /ppt-slide-generator   Generate HTML-to-PPTX presentations
+    /report-generator      Create professional Word reports
+    /excel-dashboard       Build data dashboards with charts
+    /pdf-toolkit           Merge, split, encrypt, extract PDFs
+    /doc-convert           Convert between 40+ document formats
+    /ocr-extract           OCR text from images and scanned PDFs
 
   Next steps:
     1. Restart Claude Code (or run: claude)
