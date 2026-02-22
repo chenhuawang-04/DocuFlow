@@ -4,7 +4,7 @@
 DocuFlow — Complete Installer for Claude Code
 ==============================================
 Installs the Python package, MCP server, agent instructions,
-tool permissions, and optional dependencies.
+skills, tool permissions, and optional dependencies.
 
 Usage:
     python install.py              # Full install (interactive)
@@ -254,11 +254,9 @@ def configure_mcp_server():
 
 
 def install_agent():
-    header(f"Step 5/{TOTAL_STEPS}  Install Agent & Permissions")
+    header(f"Step 5/{TOTAL_STEPS}  Install Skills & Permissions")
 
     claude_dir = DOCUFLOW_DIR / ".claude"
-    agents_dir = claude_dir / "agents"
-    agents_dir.mkdir(parents=True, exist_ok=True)
 
     # ── 1. CLAUDE.md — project-level agent instructions ──
     claude_md = DOCUFLOW_DIR / "CLAUDE.md"
@@ -269,12 +267,14 @@ def install_agent():
         _write_agent_instructions(claude_md)
         info("CLAUDE.md created")
 
-    # ── 2. PPT Agent ──
-    ppt_agent = agents_dir / "ppt-slide-generator.md"
-    if ppt_agent.exists():
-        info(f"PPT slide generator agent exists ({ppt_agent.stat().st_size} bytes)")
+    # ── 2. PPT Skill (/ppt-slide-generator) ──
+    commands_dir = claude_dir / "commands"
+    commands_dir.mkdir(parents=True, exist_ok=True)
+    ppt_skill = commands_dir / "ppt-slide-generator.md"
+    if ppt_skill.exists():
+        info(f"PPT skill exists ({ppt_skill.stat().st_size} bytes)")
     else:
-        warn("PPT agent not found (skipped — not critical)")
+        warn("PPT skill not found (skipped — not critical)")
 
     # ── 3. settings.local.json — auto-allow all DocuFlow tools ──
     settings_file = claude_dir / "settings.local.json"
@@ -323,6 +323,7 @@ def verify_installation():
         (DOCUFLOW_DIR / ".mcp.json",                         "MCP server config"),
         (DOCUFLOW_DIR / "CLAUDE.md",                          "Agent instructions"),
         (DOCUFLOW_DIR / ".claude" / "settings.local.json",    "Tool permissions"),
+        (DOCUFLOW_DIR / ".claude" / "commands" / "ppt-slide-generator.md", "PPT skill"),
     ]
     for path, label in checks:
         if path.exists():
@@ -436,7 +437,7 @@ def print_done():
     [package]      docuflow-mcp (pip, editable)
     [mcp server]   .mcp.json
     [agent]        CLAUDE.md — project-level instructions
-    [agent]        .claude/agents/ppt-slide-generator.md
+    [skill]        .claude/commands/ppt-slide-generator.md
     [permissions]  .claude/settings.local.json — all tools auto-allowed
 
   Next steps:
