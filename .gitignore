@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+*.egg
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Secrets — never commit API keys
+image_gen_config.json
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# Test artifacts
+generated_images/
+test_output/
+test_*.docx
+test_*.xlsx
+test_*.pptx
+test_*.pdf
+validation_rules/
+custom_templates/
+pytest_err.txt
+
+# Temp files from Claude Code worktrees
+tmpclaude-*
+
+# Generated output (slides, images)
+output/
+
+# User-generated documents (not part of source)
+*.docx
+*.xlsx
+*.pptx
+# Re-include template presets
+!templates/

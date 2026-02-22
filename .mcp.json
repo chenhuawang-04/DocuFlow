@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "docuflow": {
+      "command": "docuflow-mcp"
+    }
+  }
+}

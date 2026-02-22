@@ -1,0 +1,4 @@
+{
+  "api_url": "https://api.example.com/v1/chat/completions",
+  "model": "your-model-name"
+}
