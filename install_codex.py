@@ -26,6 +26,10 @@ DOCUFLOW_DIR = Path(__file__).resolve().parent
 PACKAGE_NAME = "docuflow-mcp"
 MCP_SERVER_NAME = "docuflow"
 MIN_PYTHON = (3, 10)
+CODEX_HOME = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))).expanduser()
+CODEX_SKILLS_DIR = CODEX_HOME / "skills"
+PPT_SKILL_NAME = "ppt-slide-generator"
+PPT_SKILL_DIR = CODEX_SKILLS_DIR / PPT_SKILL_NAME
 
 OPTIONAL_TOOLS = {
     "pandoc": {
@@ -48,7 +52,77 @@ OPTIONAL_TOOLS = {
     },
 }
 
-TOTAL_STEPS = 6
+PPT_SKILL_MD = """---
+name: ppt-slide-generator
+description: Generate single-slide or multi-slide PowerPoint decks from user goals by producing slide HTML and converting it to PPTX with DocuFlow tools. Use when users ask to create PPT/PPTX presentations, meeting decks, pitch/report slides, or to turn outlines/content into visual slides.
+---
+
+# PPT Slide Generator
+
+## Goal
+Create professional presentation slides with a deterministic HTML-to-PPTX pipeline.
+
+## Workflow
+1. Clarify scope before generation: topic, audience, slide count, tone, language, and output file path.
+2. Draft slide plan first for multi-slide decks (title, section slides, closing).
+3. Generate one HTML document per slide.
+4. Save HTML under `./output/` using `slide.html` or `slide_1.html`, `slide_2.html`, etc.
+5. Convert HTML to PPTX with DocuFlow tools.
+6. Report outputs and offer revision passes.
+
+## HTML Contract
+Use these hard constraints for conversion compatibility:
+- Use only `<div>` and `<p>` content tags.
+- Use inline styles only.
+- Use `position: absolute` for all placed elements.
+- Use a root canvas of `1920x1080` for 16:9 by default.
+- Use `1080x1080` only when the user explicitly requests square slides.
+- Avoid animation, hover, transitions, and dynamic behavior.
+
+## Layout and Readability Defaults
+- Keep margins generous: about 100px horizontal and 80px vertical minimum.
+- Keep strong contrast between text and background.
+- Keep typography hierarchy clear:
+  - Main title: ~72-120px
+  - Subtitle: ~36-48px
+  - Body text: ~28-36px
+  - Caption/footnote: ~20-24px
+- Prefer concise bullets and short text blocks.
+
+## Tool Calls
+- Single slide conversion: use `mcp__docuflow__html_to_pptx_convert`.
+- Multi-slide conversion: prefer `mcp__docuflow__html_to_pptx_convert_multi` when generating all slides together.
+- If needed, convert slide-by-slide for easier debugging.
+
+## Quality Checklist
+Before conversion, verify:
+- Canvas dimensions are correct.
+- Only supported tags are used.
+- All placement styles are absolute and inline.
+- Text remains readable at presentation distance.
+- Visual balance is preserved (no overcrowded slide).
+
+## Failure Recovery
+If conversion fails:
+1. Check malformed HTML structure.
+2. Remove unsupported styling or tags.
+3. Re-run conversion with the simplified slide.
+4. Return a clear error summary and regenerated files.
+
+## Response Pattern
+After generation:
+- State how many slides were generated.
+- Return exact output paths.
+- Ask whether to revise style, wording, or layout.
+"""
+
+PPT_SKILL_OPENAI_YAML = """interface:
+  display_name: "PPT Slide Generator"
+  short_description: "Generate and polish PPT slides from user goals"
+  default_prompt: "Use $ppt-slide-generator to design a professional presentation from my outline."
+"""
+
+TOTAL_STEPS = 7
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -87,6 +161,12 @@ def run(cmd: str, capture=False, check=True) -> subprocess.CompletedProcess:
     return subprocess.run(
         cmd, shell=True, capture_output=capture, text=True, check=check
     )
+
+
+def write_utf8(path: Path, text: str):
+    """Write UTF-8 text with LF newlines and trailing newline."""
+    normalized = text.replace("\r\n", "\n").rstrip("\n") + "\n"
+    path.write_text(normalized, encoding="utf-8", newline="\n")
 
 
 def ask_yes_no(prompt: str, default=True) -> bool:
@@ -405,8 +485,48 @@ image_generate, image_generate_for_ppt
     return True
 
 
+def install_codex_skill():
+    header(f"Step 6/{TOTAL_STEPS}  Install Codex Skill")
+
+    try:
+        CODEX_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        fail(f"Failed to create Codex skills directory: {e}")
+        return False
+
+    if PPT_SKILL_DIR.exists():
+        info(f"Skill '{PPT_SKILL_NAME}' already exists at {PPT_SKILL_DIR}")
+        if not ask_yes_no("Overwrite with bundled version?", default=False):
+            return True
+        try:
+            shutil.rmtree(PPT_SKILL_DIR)
+            info("Removed existing skill directory")
+        except Exception as e:
+            fail(f"Failed to remove existing skill directory: {e}")
+            return False
+
+    try:
+        agents_dir = PPT_SKILL_DIR / "agents"
+        agents_dir.mkdir(parents=True, exist_ok=True)
+        write_utf8(PPT_SKILL_DIR / "SKILL.md", PPT_SKILL_MD)
+        write_utf8(agents_dir / "openai.yaml", PPT_SKILL_OPENAI_YAML)
+    except Exception as e:
+        fail(f"Failed to install skill files: {e}")
+        return False
+
+    # Minimal self-check
+    skill_file = PPT_SKILL_DIR / "SKILL.md"
+    if not skill_file.exists():
+        fail("Skill installation failed: SKILL.md missing")
+        return False
+
+    info(f"Codex skill installed: {PPT_SKILL_DIR}")
+    warn("Restart Codex to pick up new skills.")
+    return True
+
+
 def verify_installation():
-    header(f"Step 6/{TOTAL_STEPS}  Verify Installation")
+    header(f"Step 7/{TOTAL_STEPS}  Verify Installation")
 
     # Check tool count
     try:
@@ -430,6 +550,13 @@ def verify_installation():
         info(f"Agent instructions: CODEX.md")
     else:
         warn("Agent instructions: CODEX.md missing")
+
+    # Check Codex skill
+    skill_md = PPT_SKILL_DIR / "SKILL.md"
+    if skill_md.exists():
+        info(f"Skill installed: {PPT_SKILL_NAME}")
+    else:
+        warn(f"Skill missing: {PPT_SKILL_NAME}")
 
     print(f"""
   {Color.BOLD}Available modules:{Color.RESET}
@@ -469,11 +596,13 @@ def print_done():
     [package]      docuflow-mcp (pip, editable)
     [mcp server]   codex mcp — docuflow registered
     [agent]        CODEX.md — project-level instructions
+    [skill]        {PPT_SKILL_NAME} — installed to {PPT_SKILL_DIR}
 
   Usage:
     codex "Create a Word document with a quarterly report table"
     codex "Convert my report.docx to PDF"
     codex "Add a pie chart to slide 2 of presentation.pptx"
+    codex "$ppt-slide-generator Build a 5-slide product pitch deck"
 
   Management:
     codex mcp list              List registered MCP servers
@@ -482,6 +611,9 @@ def print_done():
 
   Uninstall:
     python install_codex.py --uninstall
+
+  Note:
+    Restart Codex to pick up newly installed skills.
 """)
 
 
@@ -504,6 +636,15 @@ def uninstall():
         if ask_yes_no("Remove CODEX.md agent instructions?", default=False):
             codex_md.unlink()
             info("CODEX.md removed")
+
+    # Remove Codex skill
+    if PPT_SKILL_DIR.exists():
+        if ask_yes_no(f"Remove Codex skill '{PPT_SKILL_NAME}'?", default=True):
+            try:
+                shutil.rmtree(PPT_SKILL_DIR)
+                info(f"Skill '{PPT_SKILL_NAME}' removed")
+            except Exception as e:
+                warn(f"Failed to remove skill directory: {e}")
 
     # Optionally uninstall Python package
     if ask_yes_no("Also uninstall docuflow-mcp Python package?", default=False):
@@ -528,6 +669,7 @@ def main():
         check_optional_tools,
         register_mcp_server,
         install_agent,
+        install_codex_skill,
         verify_installation,
     ]
 
