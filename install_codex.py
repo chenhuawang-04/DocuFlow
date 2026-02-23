@@ -424,6 +424,11 @@ def write_utf8(path: Path, text: str):
     path.write_text(normalized, encoding="utf-8", newline="\n")
 
 
+def yaml_scalar(value: str) -> str:
+    """Return a YAML-safe scalar using JSON string encoding."""
+    return json.dumps(value, ensure_ascii=False)
+
+
 def ask_yes_no(prompt: str, default=True) -> bool:
     if "--auto" in sys.argv:
         return default
@@ -772,7 +777,7 @@ def install_codex_skill():
             skill_md = (
                 f"---\n"
                 f"name: {skill_name}\n"
-                f"description: {skill_data['description']}\n"
+                f"description: {yaml_scalar(skill_data['description'])}\n"
                 f"---\n\n"
                 f"{skill_data['content']}"
             )
@@ -781,9 +786,9 @@ def install_codex_skill():
             # Build openai.yaml
             openai_yaml = (
                 f"interface:\n"
-                f"  display_name: \"{skill_data['display_name']}\"\n"
-                f"  short_description: \"{skill_data['short_description']}\"\n"
-                f"  default_prompt: \"{skill_data['default_prompt']}\"\n"
+                f"  display_name: {yaml_scalar(skill_data['display_name'])}\n"
+                f"  short_description: {yaml_scalar(skill_data['short_description'])}\n"
+                f"  default_prompt: {yaml_scalar(skill_data['default_prompt'])}\n"
             )
             write_utf8(agents_dir / "openai.yaml", openai_yaml)
 
@@ -793,8 +798,10 @@ def install_codex_skill():
             warn(f"Failed to install '{skill_name}': {e}")
 
     info(f"{installed}/{len(CODEX_SKILLS)} skills installed to {CODEX_SKILLS_DIR}")
-    if installed > 0:
-        warn("Restart Codex to pick up new skills.")
+    if installed == 0:
+        fail("No Codex skills were installed.")
+        return False
+    warn("Restart Codex to pick up new skills.")
     return True
 
 
