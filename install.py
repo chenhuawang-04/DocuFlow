@@ -15,6 +15,7 @@ Usage:
 import json
 import os
 import platform
+import shlex
 import shutil
 import subprocess
 import sys
@@ -101,9 +102,13 @@ def header(msg: str):
     print(f"{'─' * 60}{Color.RESET}\n")
 
 
-def run(cmd: str, capture=False, check=True) -> subprocess.CompletedProcess:
+def run(cmd, capture=False, check=True) -> subprocess.CompletedProcess:
+    if isinstance(cmd, str):
+        args = shlex.split(cmd, posix=(os.name != 'nt'))
+    else:
+        args = list(cmd)
     return subprocess.run(
-        cmd, shell=True, capture_output=capture, text=True, check=check
+        args, shell=False, capture_output=capture, text=True, check=check
     )
 
 
@@ -123,14 +128,15 @@ def ask_yes_no(prompt: str, default=True) -> bool:
 
 def get_tool_names() -> list:
     """Dynamically discover all registered tool names."""
-    result = run(
-        f'"{sys.executable}" -c "'
+    python_code = (
         f"import sys; sys.path.insert(0, r'{DOCUFLOW_DIR / 'src'}'); "
         f"from docuflow_mcp.tools import get_all_tools; "
         f"names = sorted(set(t.name for t in get_all_tools())); "
         f"print('\\n'.join(names))"
-        f'"',
-        capture=True,
+    )
+    result = subprocess.run(
+        [sys.executable, "-c", python_code],
+        capture_output=True, text=True, check=True,
     )
     return [n for n in result.stdout.strip().split("\n") if n]
 
