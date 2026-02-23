@@ -66,9 +66,6 @@ SKILL_NAMES = [
     "ocr-extract",
 ]
 
-# Total step count
-TOTAL_STEPS = 7
-
 
 # ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -144,7 +141,6 @@ def get_tool_names() -> list:
 # ── Steps ──────────────────────────────────────────────────────────────────
 
 def check_python_version():
-    header(f"Step 1/{TOTAL_STEPS}  Check Python")
     v = sys.version_info
     if (v.major, v.minor) >= MIN_PYTHON:
         info(f"Python {v.major}.{v.minor}.{v.micro}  ({sys.executable})")
@@ -155,7 +151,6 @@ def check_python_version():
 
 
 def install_package():
-    header(f"Step 2/{TOTAL_STEPS}  Install DocuFlow Package")
 
     # Check if already installed
     result = run(
@@ -193,7 +188,6 @@ def install_package():
 
 
 def check_optional_tools():
-    header(f"Step 3/{TOTAL_STEPS}  Check Optional Tools")
     system = platform.system()
     all_ok = True
 
@@ -222,7 +216,6 @@ def check_optional_tools():
 
 
 def configure_mcp_server():
-    header(f"Step 4/{TOTAL_STEPS}  Configure MCP Server")
 
     entry_point = shutil.which("docuflow-mcp")
     if entry_point:
@@ -272,7 +265,6 @@ def configure_mcp_server():
 
 
 def install_agent():
-    header(f"Step 5/{TOTAL_STEPS}  Install Project Skills & Permissions")
 
     claude_dir = DOCUFLOW_DIR / ".claude"
 
@@ -307,7 +299,9 @@ def install_agent():
         else:
             settings = {}
 
-        settings["permissions"] = {"allow": allow_list}
+        existing = settings.get("permissions", {}).get("allow", [])
+        merged = sorted(set(existing) | set(allow_list))
+        settings["permissions"] = {"allow": merged}
         settings["enableAllProjectMcpServers"] = True
         settings["enabledMcpjsonServers"] = ["docuflow"]
 
@@ -326,7 +320,6 @@ def install_agent():
 
 
 def install_global_skills():
-    header(f"Step 6/{TOTAL_STEPS}  Install Global Skills")
 
     if not ask_yes_no(
         f"Install skills globally to {GLOBAL_COMMANDS_DIR}?\n"
@@ -374,7 +367,6 @@ def install_global_skills():
 
 
 def verify_installation():
-    header(f"Step 7/{TOTAL_STEPS}  Verify Installation")
 
     try:
         tool_names = get_tool_names()
@@ -598,6 +590,27 @@ def uninstall():
             settings_local.unlink()
             info("Removed settings.local.json")
 
+    # Clean CLAUDE.md
+    claude_md = DOCUFLOW_DIR / "CLAUDE.md"
+    if claude_md.exists():
+        if ask_yes_no("Remove CLAUDE.md (project agent instructions)?", default=False):
+            claude_md.unlink()
+            info("Removed CLAUDE.md")
+
+    # Clean project-level skills
+    project_skills = sorted(PROJECT_COMMANDS_DIR.glob("*.md")) if PROJECT_COMMANDS_DIR.exists() else []
+    if project_skills:
+        if ask_yes_no(
+            f"Remove {len(project_skills)} project skills from .claude/commands/?",
+            default=False,
+        ):
+            for skill_file in project_skills:
+                try:
+                    skill_file.unlink()
+                except Exception:
+                    pass
+            info(f"Removed {len(project_skills)} project skills")
+
     # Clean global skills
     global_skills_found = [
         GLOBAL_COMMANDS_DIR / f"{name}.md"
@@ -629,17 +642,19 @@ def main():
     print_banner()
 
     steps = [
-        check_python_version,
-        install_package,
-        check_optional_tools,
-        configure_mcp_server,
-        install_agent,
-        install_global_skills,
-        verify_installation,
+        ("Check Python",                   check_python_version),
+        ("Install DocuFlow Package",        install_package),
+        ("Check Optional Tools",            check_optional_tools),
+        ("Configure MCP Server",            configure_mcp_server),
+        ("Install Project Skills & Perms",  install_agent),
+        ("Install Global Skills",           install_global_skills),
+        ("Verify Installation",             verify_installation),
     ]
 
-    for step in steps:
-        if not step():
+    total = len(steps)
+    for i, (label, step_fn) in enumerate(steps, 1):
+        header(f"Step {i}/{total}  {label}")
+        if not step_fn():
             fail("Installation aborted.")
             sys.exit(1)
 

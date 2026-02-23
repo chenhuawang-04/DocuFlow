@@ -395,7 +395,6 @@ OPTIONAL_TOOLS = {
     },
 }
 
-TOTAL_STEPS = 7
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -483,7 +482,6 @@ def get_tool_names() -> list:
 # ── Steps ──────────────────────────────────────────────────────────────────
 
 def check_prerequisites():
-    header(f"Step 1/{TOTAL_STEPS}  Check Prerequisites")
 
     # Python
     v = sys.version_info
@@ -537,7 +535,6 @@ def check_prerequisites():
 
 
 def install_docuflow_package():
-    header(f"Step 2/{TOTAL_STEPS}  Install DocuFlow Package")
 
     # Check if already installed
     result = run(
@@ -565,7 +562,6 @@ def install_docuflow_package():
 
 
 def check_optional_tools():
-    header(f"Step 3/{TOTAL_STEPS}  Check Optional Tools")
     system = platform.system()
     all_ok = True
 
@@ -594,7 +590,6 @@ def check_optional_tools():
 
 
 def register_mcp_server():
-    header(f"Step 4/{TOTAL_STEPS}  Register MCP Server")
 
     # Check if already registered
     result = run(f"codex mcp get {MCP_SERVER_NAME}", capture=True, check=False)
@@ -633,7 +628,6 @@ def register_mcp_server():
 
 
 def install_agent():
-    header(f"Step 5/{TOTAL_STEPS}  Install Agent Instructions")
 
     codex_md = DOCUFLOW_DIR / "CODEX.md"
 
@@ -769,7 +763,6 @@ image_generate, image_generate_for_ppt
 
 
 def install_codex_skill():
-    header(f"Step 6/{TOTAL_STEPS}  Install Codex Skills")
 
     try:
         CODEX_SKILLS_DIR.mkdir(parents=True, exist_ok=True)
@@ -796,13 +789,22 @@ def install_codex_skill():
             agents_dir = skill_dir / "agents"
             agents_dir.mkdir(parents=True, exist_ok=True)
 
+            # Read skill content: prefer .claude/commands/ source, fallback to embedded
+            source_md = DOCUFLOW_DIR / ".claude" / "commands" / f"{skill_name}.md"
+            if source_md.exists():
+                skill_content = source_md.read_text(encoding="utf-8").strip()
+                info(f"  Content from .claude/commands/{skill_name}.md")
+            else:
+                skill_content = skill_data['content']
+                warn(f"  Source .claude/commands/{skill_name}.md not found, using embedded fallback")
+
             # Build SKILL.md with frontmatter
             skill_md = (
                 f"---\n"
                 f"name: {skill_name}\n"
                 f"description: {yaml_scalar(skill_data['description'])}\n"
                 f"---\n\n"
-                f"{skill_data['content']}"
+                f"{skill_content}"
             )
             write_utf8(skill_dir / "SKILL.md", skill_md)
 
@@ -829,7 +831,6 @@ def install_codex_skill():
 
 
 def verify_installation():
-    header(f"Step 7/{TOTAL_STEPS}  Verify Installation")
 
     # Check tool count
     try:
@@ -985,17 +986,19 @@ def main():
     print_banner()
 
     steps = [
-        check_prerequisites,
-        install_docuflow_package,
-        check_optional_tools,
-        register_mcp_server,
-        install_agent,
-        install_codex_skill,
-        verify_installation,
+        ("Check Prerequisites",            check_prerequisites),
+        ("Install DocuFlow Package",        install_docuflow_package),
+        ("Check Optional Tools",            check_optional_tools),
+        ("Register MCP Server",             register_mcp_server),
+        ("Install Agent Instructions",      install_agent),
+        ("Install Codex Skills",            install_codex_skill),
+        ("Verify Installation",             verify_installation),
     ]
 
-    for step in steps:
-        if not step():
+    total = len(steps)
+    for i, (label, step_fn) in enumerate(steps, 1):
+        header(f"Step {i}/{total}  {label}")
+        if not step_fn():
             fail("Installation aborted.")
             sys.exit(1)
 
