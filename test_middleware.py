@@ -121,7 +121,7 @@ def test_middleware_system():
         try:
             os.remove(test_file)
             print(f"\n[OK] 已清理测试文件: {test_file}")
-        except:
+        except OSError:
             pass
 
     print("\n" + "="*60)

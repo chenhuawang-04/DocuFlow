@@ -163,7 +163,7 @@ def test_formatters():
         try:
             os.remove(test_file)
             print(f"\n[OK] 测试文件已清理: {test_file}")
-        except:
+        except OSError:
             pass
 
     print("\n" + "=" * 60)
@@ -334,7 +334,7 @@ def test_integration():
         try:
             os.remove(test_file)
             print(f"\n[OK] 测试文件已清理: {test_file}")
-        except:
+        except OSError:
             pass
 
     print("\n" + "=" * 60)

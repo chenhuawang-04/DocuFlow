@@ -460,7 +460,7 @@ class TemplateManager:
                     "description": template_def.get("description", ""),
                     "created_from": template_def.get("created_from", "")
                 })
-            except:
+            except (json.JSONDecodeError, OSError, KeyError):
                 pass
 
         return {

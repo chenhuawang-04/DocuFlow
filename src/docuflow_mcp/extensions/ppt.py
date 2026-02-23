@@ -741,7 +741,7 @@ class PPTOperations:
                         int(color[2:4], 16),
                         int(color[4:6], 16)
                     )
-                except:
+                except (ValueError, IndexError):
                     pass
 
             # 设置对齐
@@ -1011,7 +1011,7 @@ class PPTOperations:
                         int(fill_color[2:4], 16),
                         int(fill_color[4:6], 16)
                     )
-                except:
+                except (ValueError, IndexError):
                     pass
 
             # 设置边框颜色
@@ -1023,7 +1023,7 @@ class PPTOperations:
                         int(line_color[2:4], 16),
                         int(line_color[4:6], 16)
                     )
-                except:
+                except (ValueError, IndexError):
                     pass
 
             # 添加文字
@@ -1184,7 +1184,7 @@ class PPTOperations:
                 try:
                     import pptx
                     version = pptx.__version__
-                except:
+                except (AttributeError, ImportError):
                     version = "unknown"
 
             features = []
@@ -2346,7 +2346,7 @@ class PPTOperations:
                         pos_name = PPTOperations.LABEL_POSITION_MAP[pos_lower]
                         try:
                             plot.data_labels.position = getattr(XL_LABEL_POSITION, pos_name)
-                        except:
+                        except (AttributeError, TypeError):
                             pass  # 某些图表类型不支持特定标签位置
 
             prs.save(path)
@@ -2457,7 +2457,7 @@ class PPTOperations:
                     try:
                         chart.plots[0].data_labels.position = getattr(XL_LABEL_POSITION, pos_name)
                         modifications.append("data_label_position")
-                    except:
+                    except (AttributeError, TypeError):
                         pass
 
             # 修改样式
@@ -2539,7 +2539,7 @@ class PPTOperations:
             if chart.has_title:
                 try:
                     chart_title = chart.chart_title.text_frame.text
-                except:
+                except (AttributeError, ValueError):
                     pass
 
             # 获取分类（对于分类图表）
@@ -2549,7 +2549,7 @@ class PPTOperations:
                     plot = chart.plots[0]
                     if hasattr(plot, 'categories') and plot.categories:
                         categories = [str(cat) for cat in plot.categories]
-            except:
+            except (AttributeError, TypeError, ValueError):
                 pass
 
             # 获取系列数据
@@ -2562,10 +2562,10 @@ class PPTOperations:
                     }
                     try:
                         s_info["values"] = list(series.values) if series.values else []
-                    except:
+                    except (TypeError, ValueError):
                         pass
                     series_data.append(s_info)
-            except:
+            except (AttributeError, TypeError):
                 pass
 
             # 获取位置信息
@@ -2638,13 +2638,13 @@ class PPTOperations:
                     if chart.has_title:
                         try:
                             chart_title = chart.chart_title.text_frame.text
-                        except:
+                        except (AttributeError, ValueError):
                             pass
 
                     series_count = 0
                     try:
                         series_count = len(list(chart.series))
-                    except:
+                    except (AttributeError, TypeError):
                         pass
 
                     charts_info.append({

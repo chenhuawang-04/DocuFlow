@@ -298,7 +298,7 @@ class HTMLToPPTXConverter:
                 shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, left, top, width, height)
                 try:
                     shape.adjustments[0] = min(radius_px / min(bounds['width'], bounds['height']), 0.5)
-                except:
+                except (IndexError, TypeError):
                     pass
             else:
                 shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, left, top, width, height)

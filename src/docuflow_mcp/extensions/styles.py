@@ -226,7 +226,7 @@ class StyleManager:
                 try:
                     style = doc.styles.add_style(style_name, WD_STYLE_TYPE.PARAGRAPH)
                     created_count += 1
-                except:
+                except (ValueError, KeyError):
                     continue
             else:
                 style = doc.styles[style_name]

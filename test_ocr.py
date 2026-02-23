@@ -92,11 +92,11 @@ def test_create_test_image():
         try:
             # Windows
             font = ImageFont.truetype("arial.ttf", 24)
-        except:
+        except (OSError, IOError):
             try:
                 # 尝试其他字体
                 font = ImageFont.truetype("simsun.ttc", 24)
-            except:
+            except (OSError, IOError):
                 font = ImageFont.load_default()
 
         # 绘制文字
