@@ -1,72 +1,57 @@
 Extract text from images or scanned documents using OCR: $ARGUMENTS
 
-## Architecture
+## Goal
 
-This skill uses **Claude Code's native multimodal vision** to recognize text — no Tesseract or API key required. For PDFs, DocuFlow tools extract page images first, then you read them directly.
+Extract text reliably with a hybrid strategy: **native image reading for images, direct PDF extraction first, then PDF-to-images plus native reading when PDF quality is poor**.
 
-## Workflow
+## Unified Workflow
 
-1. **Identify input** — image file(s) or scanned PDF
-2. **Prepare images** — if PDF, use DocuFlow to extract page images
-3. **Read image** — use the `Read` tool to view each image (Claude's multimodal vision)
-4. **Extract text** — transcribe all visible text, preserving structure
-5. **Post-process** — save to desired format via DocuFlow tools if needed
-6. **Report** — extracted text, output file paths
+1. **Identify input type** — image file(s) or PDF.
+2. **For images, use native multimodal reading first** when the image is attached in chat.
+3. **If PDF, try direct extraction first** — run `mcp__docuflow__pdf_extract_text`.
+4. **If PDF text is empty/garbled/scanned, fallback to native reading via images**:
+   - Extract page images with `mcp__docuflow__pdf_extract_images`
+   - Read extracted page images with native multimodal vision
+   - Merge page-level text in order
+5. **Post-process and deliver** — structure text, save outputs if requested.
 
-## Strategy by Input Type
+## Tool Selection
 
-### Single Image (png/jpg/tiff/bmp)
-```
-1. Read the image file directly (Read tool — multimodal)
-2. Transcribe all text you see, preserving layout
-3. Return text or save to file
-```
+- Check OCR availability: `mcp__docuflow__ocr_status`
+- Extract selectable PDF text: `mcp__docuflow__pdf_extract_text`
+- Extract PDF page images: `mcp__docuflow__pdf_extract_images`
+- OCR image: `mcp__docuflow__ocr_image`
+- Native multimodal image reading: use for attached images/page screenshots
 
-### Scanned PDF
-```
-1. mcp__docuflow__pdf_info → get page count
-2. mcp__docuflow__pdf_extract_text → try direct text extraction first
-3. If text is empty/garbled (scanned), use mcp__docuflow__pdf_extract_images → export pages as images
-4. Read each image (Read tool — multimodal)
-5. Transcribe text from each page
-6. Combine results
-```
+## Language Codes
 
-### PDF with Selectable Text (not scanned)
-```
-1. mcp__docuflow__pdf_extract_text → returns good text directly
-2. No OCR needed — return the extracted text
-```
+- English: `eng`
+- Simplified Chinese: `chi_sim`
+- Traditional Chinese: `chi_tra`
+- Japanese: `jpn`
+- Korean: `kor`
+- Mixed Chinese + English: `chi_sim+eng`
 
-## Text Extraction Guidelines
+## Common Patterns
 
-When reading an image, extract text following these rules:
-- Transcribe **all** visible text: titles, body, headers, footers, captions, watermarks
-- Preserve paragraph structure and hierarchy
-- Render tables in Markdown table format
-- Preserve list formatting (numbered/bulleted)
-- Maintain reading order (top-to-bottom, left-to-right)
-- For mixed Chinese/English, preserve both languages as-is
-- Output **only** the recognized text — no commentary or explanations
+### Image to text
+1. Native multimodal reading on attached image
+2. If deterministic OCR output is explicitly required: `mcp__docuflow__ocr_status`
+3. `mcp__docuflow__ocr_image` with language (optional)
 
-## Post-Processing Options
+### PDF to text
+1. `mcp__docuflow__pdf_extract_text`
+2. If low quality, run `mcp__docuflow__pdf_extract_images`
+3. Read extracted page images with native multimodal vision and merge by page order
 
-After extraction, offer to:
-- Save as plain text file (write to .txt)
-- Create a formatted Word document (`mcp__docuflow__doc_create` + `mcp__docuflow__paragraph_add`)
-- Save as Markdown
-- Extract table data into Excel (`mcp__docuflow__excel_create` + `mcp__docuflow__cell_write`)
-
-## Fallback: Tesseract / Claude API
-
-If the user explicitly requests Tesseract or the Claude API engine:
-- Check with `mcp__docuflow__ocr_status`
-- Use `mcp__docuflow__ocr_image` (single image) or `mcp__docuflow__ocr_pdf` (PDF)
-- These require Tesseract installed or ANTHROPIC_API_KEY set
+### Scanned PDF to editable Word
+1. `mcp__docuflow__pdf_extract_images`
+2. Native multimodal reading for each page image
+3. Assemble extracted text, then create structured output as needed
 
 ## Error Recovery
 
-- **Empty image**: file may be corrupted — inform user
-- **Unreadable text**: image too low resolution or blurry — suggest higher quality scan
-- **PDF not scanned**: `pdf_extract_text` returns good text — use that instead of OCR
-- **Large PDF (many pages)**: process in batches of 5-10 pages to avoid context overflow
+- **Tesseract not installed**: continue with native reading path; OCR tools are optional.
+- **Low-quality scans**: recommend higher DPI (around 300), better contrast, and less blur.
+- **Large PDFs**: process pages in batches.
+- **No attachment for native reading**: use `mcp__docuflow__pdf_extract_images` first, then read generated images.

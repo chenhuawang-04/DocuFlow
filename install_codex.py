@@ -304,25 +304,33 @@ Use `convert_with_template` when converting Markdown to styled docx:
         "display_name": "OCR Extractor",
         "short_description": "Extract text from images and scanned PDFs",
         "default_prompt": "Use $ocr-extract to extract text from my image or scanned document.",
-        "description": "Extract text from images (png/jpg/tiff) and scanned PDFs using Tesseract OCR. Supports Chinese, English, Japanese, Korean and 100+ languages.",
+        "description": "Extract text from images and scanned PDFs with a hybrid flow: use native multimodal image reading for images, try direct PDF text extraction first, then fallback to PDF-to-images plus native reading when needed.",
         "content": """\
 # OCR Extractor
 
 ## Goal
-Extract text from images and scanned documents using OCR.
+Extract text reliably with a hybrid strategy: native image reading for images, direct extraction first for PDFs, then PDF-to-images plus native reading when PDF quality is poor.
 
 ## Workflow
-1. Identify input type: image file(s) or scanned PDF.
-2. Detect or ask for language (Chinese, English, Japanese, etc.).
-3. Check OCR availability with `ocr_status`.
-4. Run the appropriate OCR tool.
-5. Post-process and deliver results.
+1. Identify input type: image file(s) or PDF.
+2. For images:
+   - If image is attached in chat, use native multimodal reading first.
+   - If deterministic OCR output is explicitly required, use `ocr_image`.
+3. For PDFs, run `pdf_extract_text` first.
+4. If PDF output is empty/garbled/scanned:
+   - Run `pdf_extract_images` to export page images.
+   - Use native multimodal reading on extracted page images.
+   - Merge page-level text in reading order.
+5. Detect or ask for language (Chinese, English, Japanese, etc.).
+6. Check OCR availability with `ocr_status` only when OCR tools are explicitly needed.
+7. Post-process and structure the extracted text.
 
 ## Tool Selection
+- Extract selectable PDF text: `pdf_extract_text`
+- Extract PDF page images: `pdf_extract_images`
 - Single image (png/jpg/tiff/bmp): `ocr_image`
-- Multi-page scanned PDF: `ocr_pdf`
-- Scanned PDF to editable Word: `ocr_to_docx`
 - Check installation: `ocr_status`
+- Native multimodal image reading: use when images/page screenshots are attached in chat.
 
 ## Language Codes
 - English: `eng`
@@ -335,23 +343,32 @@ Extract text from images and scanned documents using OCR.
 ## Common Workflows
 
 ### Image to Text
-1. `ocr_status` → verify Tesseract
-2. `ocr_image(path, language)` → extracted text
+1. Native multimodal reading on attached image
+2. If deterministic OCR output is required: `ocr_status`
+3. `ocr_image(path, language)` → extracted text (optional)
+
+### PDF to Text
+1. `pdf_extract_text(path)` → direct extraction
+2. If poor quality: `pdf_extract_images(path)` → page images
+3. Native multimodal reading on page images, then merge by page order
 
 ### Scanned PDF to Editable Word
-1. `ocr_to_docx(path, language, output_path)` → .docx file
-2. `doc_info` → verify output
+1. `pdf_extract_images(path)` → page images
+2. Native multimodal reading per page
+3. Assemble and export to desired format
 
 ## Tips
+- Prefer direct `pdf_extract_text` when the PDF already has selectable text.
 - 300 DPI is optimal for OCR accuracy.
 - High contrast (dark text on white) works best.
 - Always specify the correct language code.
 - Use `chi_sim+eng` for mixed Chinese-English documents.
 
 ## Error Recovery
-- Tesseract not installed: provide install instructions.
-- Empty result: wrong language or low resolution.
-- PDF has selectable text: use `pdf_extract_text` instead (no OCR needed).
+- Tesseract not installed: continue with native reading path.
+- Empty result: verify source quality and page image clarity.
+- PDF has selectable text: use direct extraction instead of OCR.
+- No image attachment available: export page images from PDF, then use native reading.
 """,
     },
 }
