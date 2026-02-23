@@ -96,6 +96,28 @@ def dispatch_tool(name: str, args: dict) -> dict:
             "missing_params": missing
         }
 
+    # 校验路径参数
+    from docuflow_mcp.utils.paths import validate_path, PathValidationError
+    _PATH_PARAMS = {
+        'path', 'output_path', 'ppt_path', 'input_path',
+        'template', 'path1', 'path2', 'html_source',
+        'source', 'target', 'reference_doc', 'css',
+    }
+    try:
+        for param_name in _PATH_PARAMS:
+            if param_name in args and isinstance(args[param_name], str):
+                val = args[param_name]
+                # Skip if the value looks like HTML content, not a path
+                if val.strip().startswith('<'):
+                    continue
+                args[param_name] = validate_path(val)
+    except PathValidationError as e:
+        return {
+            "success": False,
+            "error": f"Invalid path: {str(e)}",
+            "error_code": "INVALID_PATH"
+        }
+
     # 获取中间件管理器并执行
     middleware_manager = _get_middleware_manager()
 

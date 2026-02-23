@@ -16,65 +16,7 @@ from typing import Optional, List, Dict, Any, Union
 from dataclasses import dataclass
 
 from ..core.registry import register_tool
-
-# 可选依赖的延迟导入标记
-_TESSERACT_AVAILABLE = None
-_PDF2IMAGE_AVAILABLE = None
-_PIL_AVAILABLE = None
-_ANTHROPIC_AVAILABLE = None
-
-
-def _check_tesseract() -> bool:
-    """检查Tesseract是否可用"""
-    global _TESSERACT_AVAILABLE
-    if _TESSERACT_AVAILABLE is None:
-        try:
-            result = subprocess.run(
-                ['tesseract', '--version'],
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            _TESSERACT_AVAILABLE = result.returncode == 0
-        except (subprocess.SubprocessError, FileNotFoundError):
-            _TESSERACT_AVAILABLE = False
-    return _TESSERACT_AVAILABLE
-
-
-def _check_pdf2image() -> bool:
-    """检查pdf2image是否可用"""
-    global _PDF2IMAGE_AVAILABLE
-    if _PDF2IMAGE_AVAILABLE is None:
-        try:
-            import pdf2image
-            _PDF2IMAGE_AVAILABLE = True
-        except ImportError:
-            _PDF2IMAGE_AVAILABLE = False
-    return _PDF2IMAGE_AVAILABLE
-
-
-def _check_pil() -> bool:
-    """检查PIL是否可用"""
-    global _PIL_AVAILABLE
-    if _PIL_AVAILABLE is None:
-        try:
-            from PIL import Image
-            _PIL_AVAILABLE = True
-        except ImportError:
-            _PIL_AVAILABLE = False
-    return _PIL_AVAILABLE
-
-
-def _check_anthropic() -> bool:
-    """检查anthropic是否可用"""
-    global _ANTHROPIC_AVAILABLE
-    if _ANTHROPIC_AVAILABLE is None:
-        try:
-            import anthropic
-            _ANTHROPIC_AVAILABLE = True
-        except ImportError:
-            _ANTHROPIC_AVAILABLE = False
-    return _ANTHROPIC_AVAILABLE
+from ..utils.deps import check_import, check_command
 
 
 @dataclass
@@ -140,7 +82,7 @@ class OCROperations:
     @staticmethod
     def _pdf_to_images(pdf_path: str, dpi: int = 200) -> List[str]:
         """将PDF转换为图片列表"""
-        if not _check_pdf2image():
+        if not check_import("pdf2image"):
             raise ImportError("需要安装pdf2image: pip install pdf2image")
 
         from pdf2image import convert_from_path
@@ -162,7 +104,7 @@ class OCROperations:
     @staticmethod
     def _ocr_with_tesseract(image_path: str, lang: str = 'auto') -> OCRResult:
         """使用Tesseract进行OCR"""
-        if not _check_tesseract():
+        if not check_command("tesseract"):
             raise RuntimeError("Tesseract未安装或不可用")
 
         # 映射语言代码
@@ -222,7 +164,7 @@ class OCROperations:
     def _ocr_with_claude(image_path: str, api_key: Optional[str] = None,
                          prompt: Optional[str] = None) -> OCRResult:
         """使用Claude Vision进行OCR"""
-        if not _check_anthropic():
+        if not check_import("anthropic"):
             raise ImportError("需要安装anthropic: pip install anthropic")
 
         import anthropic
@@ -318,26 +260,26 @@ class OCROperations:
             # 选择引擎
             if engine == 'auto':
                 # 先尝试Tesseract
-                if _check_tesseract():
+                if check_command("tesseract"):
                     result = OCROperations._ocr_with_tesseract(image_path, lang)
                     # 如果置信度低且Claude可用，使用Claude增强
-                    if result.confidence < 0.6 and _check_anthropic():
+                    if result.confidence < 0.6 and check_import("anthropic"):
                         try:
                             result = OCROperations._ocr_with_claude(image_path, api_key, prompt)
                         except Exception:
                             pass  # 保持Tesseract结果
-                elif _check_anthropic():
+                elif check_import("anthropic"):
                     result = OCROperations._ocr_with_claude(image_path, api_key, prompt)
                 else:
                     return {"success": False, "error": "没有可用的OCR引擎（需要Tesseract或anthropic）"}
 
             elif engine == 'tesseract':
-                if not _check_tesseract():
+                if not check_command("tesseract"):
                     return {"success": False, "error": "Tesseract未安装"}
                 result = OCROperations._ocr_with_tesseract(image_path, lang)
 
             elif engine == 'claude':
-                if not _check_anthropic():
+                if not check_import("anthropic"):
                     return {"success": False, "error": "需要安装anthropic: pip install anthropic"}
                 result = OCROperations._ocr_with_claude(image_path, api_key, prompt)
 
@@ -389,7 +331,7 @@ class OCROperations:
             if path.suffix.lower() != '.pdf':
                 return {"success": False, "error": "文件不是PDF格式"}
 
-            if not _check_pdf2image():
+            if not check_import("pdf2image"):
                 return {"success": False, "error": "需要安装pdf2image: pip install pdf2image"}
 
             # PDF转图片
@@ -584,12 +526,12 @@ class OCROperations:
         """
         engines = {
             "tesseract": {
-                "available": _check_tesseract(),
+                "available": check_command("tesseract"),
                 "description": "开源OCR引擎，本地运行，免费",
                 "best_for": "简单文档、批量处理"
             },
             "claude": {
-                "available": _check_anthropic(),
+                "available": check_import("anthropic"),
                 "api_key_set": bool(os.environ.get('ANTHROPIC_API_KEY')),
                 "description": "Claude Vision AI，需要API密钥",
                 "best_for": "复杂布局、手写体、需要理解的文档"
@@ -598,11 +540,11 @@ class OCROperations:
 
         dependencies = {
             "pdf2image": {
-                "available": _check_pdf2image(),
+                "available": check_import("pdf2image"),
                 "purpose": "PDF转图片（OCR PDF必需）"
             },
             "PIL": {
-                "available": _check_pil(),
+                "available": check_import("PIL"),
                 "purpose": "图像处理"
             }
         }

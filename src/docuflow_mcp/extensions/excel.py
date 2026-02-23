@@ -13,21 +13,7 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any, Union
 
 from ..core.registry import register_tool
-
-# 延迟导入检查
-_OPENPYXL_AVAILABLE = None
-
-
-def _check_openpyxl() -> bool:
-    """检查openpyxl是否可用"""
-    global _OPENPYXL_AVAILABLE
-    if _OPENPYXL_AVAILABLE is None:
-        try:
-            import openpyxl
-            _OPENPYXL_AVAILABLE = True
-        except ImportError:
-            _OPENPYXL_AVAILABLE = False
-    return _OPENPYXL_AVAILABLE
+from ..utils.deps import check_import
 
 
 def _col_letter_to_index(col: Union[int, str]) -> int:
@@ -74,7 +60,7 @@ class ExcelOperations:
             {success, path, sheets, message}
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import Workbook
@@ -137,7 +123,7 @@ class ExcelOperations:
             {success, data, rows, cols, message}
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -226,7 +212,7 @@ class ExcelOperations:
             {success, sheets, active_sheet, properties, statistics}
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -288,7 +274,7 @@ class ExcelOperations:
             format: 目标格式（xlsx/csv）
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -343,7 +329,7 @@ class ExcelOperations:
     def list_sheets(path: str) -> Dict[str, Any]:
         """列出所有工作表"""
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -376,7 +362,7 @@ class ExcelOperations:
                   position: Optional[int] = None) -> Dict[str, Any]:
         """添加新工作表"""
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -410,7 +396,7 @@ class ExcelOperations:
     def delete_sheet(path: str, name: str) -> Dict[str, Any]:
         """删除工作表"""
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -448,7 +434,7 @@ class ExcelOperations:
                      new_name: str) -> Dict[str, Any]:
         """重命名工作表"""
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -488,7 +474,7 @@ class ExcelOperations:
                    target_name: str) -> Dict[str, Any]:
         """复制工作表"""
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -540,7 +526,7 @@ class ExcelOperations:
             range: 区域如"A1:D10"
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -614,7 +600,7 @@ class ExcelOperations:
             data: 二维数组数据
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -708,7 +694,7 @@ class ExcelOperations:
             number_format: 数字格式（如"0.00%", "#,##0"）
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -824,7 +810,7 @@ class ExcelOperations:
                    unmerge: bool = False) -> Dict[str, Any]:
         """合并/取消合并单元格"""
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -880,7 +866,7 @@ class ExcelOperations:
             formula: 公式如"=SUM(A1:D1)"
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -930,7 +916,7 @@ class ExcelOperations:
                    count: int = 1) -> Dict[str, Any]:
         """插入行"""
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -974,7 +960,7 @@ class ExcelOperations:
                    count: int = 1) -> Dict[str, Any]:
         """删除行"""
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -1018,7 +1004,7 @@ class ExcelOperations:
                    count: int = 1) -> Dict[str, Any]:
         """插入列（col可以是数字1或字母"A"）"""
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -1064,7 +1050,7 @@ class ExcelOperations:
                    count: int = 1) -> Dict[str, Any]:
         """删除列"""
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -1122,7 +1108,7 @@ class ExcelOperations:
             style: Word表格样式
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             try:
@@ -1218,7 +1204,7 @@ class ExcelOperations:
             {success, openpyxl_available, version, message}
         """
         try:
-            available = _check_openpyxl()
+            available = check_import("openpyxl")
             version = None
 
             if available:
@@ -1270,7 +1256,7 @@ class ExcelOperations:
             # E3 = =SUM(A3:D3)
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -1353,7 +1339,7 @@ class ExcelOperations:
             sheet: 工作表名称
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -1432,7 +1418,7 @@ class ExcelOperations:
             has_header: 是否有标题行
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -1535,7 +1521,7 @@ class ExcelOperations:
             clear: 是否清除筛选
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -1602,7 +1588,7 @@ class ExcelOperations:
             error_message: 错误提示信息
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -1686,7 +1672,7 @@ class ExcelOperations:
             keep: 保留策略 (first/last)
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -1806,7 +1792,7 @@ class ExcelOperations:
             step: 步长（等差）或比率（等比）
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -1903,7 +1889,7 @@ class ExcelOperations:
             metrics: 统计指标 ["sum", "average", "max", "min", "count", "stdev", "var", "median"]
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -2031,7 +2017,7 @@ class ExcelOperations:
             data_bar: 数据条设置 {"color": "638EC6"}
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -2156,7 +2142,7 @@ class ExcelOperations:
             sheet: 工作表名称（创建时需要）
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -2269,7 +2255,7 @@ class ExcelOperations:
             style: 图表样式编号(1-48)
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -2402,7 +2388,7 @@ class ExcelOperations:
             width/height: 尺寸（厘米）
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from openpyxl import load_workbook
@@ -2496,7 +2482,7 @@ class ExcelOperations:
             {success, message}
         """
         try:
-            if not _check_openpyxl():
+            if not check_import("openpyxl"):
                 return {"success": False, "error": "需要安装openpyxl: pip install openpyxl"}
 
             from collections import defaultdict

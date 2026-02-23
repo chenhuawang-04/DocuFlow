@@ -10,27 +10,12 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any, Union
 
 from ..core.registry import register_tool
-
-# 延迟导入检查
-_PPTX_AVAILABLE = None
-
-
-def _check_pptx() -> bool:
-    """检查python-pptx是否可用"""
-    global _PPTX_AVAILABLE
-    if _PPTX_AVAILABLE is None:
-        try:
-            from pptx import Presentation
-            from pptx.util import Inches, Pt
-            _PPTX_AVAILABLE = True
-        except ImportError:
-            _PPTX_AVAILABLE = False
-    return _PPTX_AVAILABLE
+from ..utils.deps import check_import
 
 
 def _parse_length(value: str) -> int:
     """解析长度值，支持 'Xin', 'Xcm', 'Xpt', 'Xemu' 格式"""
-    if not _check_pptx():
+    if not check_import("pptx"):
         return 0
 
     from pptx.util import Inches, Cm, Pt, Emu
@@ -82,7 +67,7 @@ class PPTOperations:
             {success, path, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -140,7 +125,7 @@ class PPTOperations:
             {success, slides, total_slides, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -230,7 +215,7 @@ class PPTOperations:
             {success, slides, properties, dimensions, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -311,7 +296,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -368,7 +353,7 @@ class PPTOperations:
             {success, total_slides, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -458,7 +443,7 @@ class PPTOperations:
             {success, slide_index, layout, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -526,7 +511,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -574,7 +559,7 @@ class PPTOperations:
             {success, new_index, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -636,7 +621,7 @@ class PPTOperations:
             {success, layouts, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -705,7 +690,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -808,7 +793,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -884,7 +869,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -966,7 +951,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -1081,7 +1066,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -1148,7 +1133,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -1192,7 +1177,7 @@ class PPTOperations:
             {success, pptx_available, version, features, message}
         """
         try:
-            pptx_available = _check_pptx()
+            pptx_available = check_import("pptx")
             version = None
 
             if pptx_available:
@@ -1244,7 +1229,7 @@ class PPTOperations:
             {success, masters: [{name, layouts}], message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -1305,7 +1290,7 @@ class PPTOperations:
             {success, master_info, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -1387,7 +1372,7 @@ class PPTOperations:
             {success, placeholders, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -1463,7 +1448,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -1561,7 +1546,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -1776,7 +1761,7 @@ class PPTOperations:
             {success, animations, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -1882,7 +1867,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -1992,7 +1977,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -2125,7 +2110,7 @@ class PPTOperations:
             {success, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -2261,7 +2246,7 @@ class PPTOperations:
             {success, path, slide, chart_type, series_count, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -2411,7 +2396,7 @@ class PPTOperations:
             {success, path, slide, chart_index, modifications, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -2514,7 +2499,7 @@ class PPTOperations:
             {success, path, slide, chart_index, chart_type, title, categories, series, has_legend, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -2626,7 +2611,7 @@ class PPTOperations:
             {success, path, slide, charts, chart_count, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation
@@ -2708,7 +2693,7 @@ class PPTOperations:
             {success, path, slide, chart_index, message}
         """
         try:
-            if not _check_pptx():
+            if not check_import("pptx"):
                 return {"success": False, "error": "需要安装python-pptx: pip install python-pptx"}
 
             from pptx import Presentation

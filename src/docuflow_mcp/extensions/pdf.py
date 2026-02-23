@@ -13,48 +13,7 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any, Union
 
 from ..core.registry import register_tool
-
-# 延迟导入检查
-_PDFPLUMBER_AVAILABLE = None
-_PYPDF_AVAILABLE = None
-_REPORTLAB_AVAILABLE = None
-
-
-def _check_pdfplumber() -> bool:
-    """检查pdfplumber是否可用"""
-    global _PDFPLUMBER_AVAILABLE
-    if _PDFPLUMBER_AVAILABLE is None:
-        try:
-            import pdfplumber
-            _PDFPLUMBER_AVAILABLE = True
-        except ImportError:
-            _PDFPLUMBER_AVAILABLE = False
-    return _PDFPLUMBER_AVAILABLE
-
-
-def _check_pypdf() -> bool:
-    """检查pypdf是否可用"""
-    global _PYPDF_AVAILABLE
-    if _PYPDF_AVAILABLE is None:
-        try:
-            import pypdf
-            _PYPDF_AVAILABLE = True
-        except ImportError:
-            _PYPDF_AVAILABLE = False
-    return _PYPDF_AVAILABLE
-
-
-def _check_reportlab() -> bool:
-    """检查reportlab是否可用"""
-    global _REPORTLAB_AVAILABLE
-    if _REPORTLAB_AVAILABLE is None:
-        try:
-            from reportlab.pdfgen import canvas
-            from reportlab.lib.pagesizes import letter
-            _REPORTLAB_AVAILABLE = True
-        except ImportError:
-            _REPORTLAB_AVAILABLE = False
-    return _REPORTLAB_AVAILABLE
+from ..utils.deps import check_import
 
 
 class PDFOperations:
@@ -77,7 +36,7 @@ class PDFOperations:
             {success, pages, metadata, file_size, message}
         """
         try:
-            if not _check_pdfplumber():
+            if not check_import("pdfplumber"):
                 return {"success": False, "error": "需要安装pdfplumber: pip install pdfplumber"}
 
             import pdfplumber
@@ -139,7 +98,7 @@ class PDFOperations:
             {success, text, page_texts, page_count, message}
         """
         try:
-            if not _check_pdfplumber():
+            if not check_import("pdfplumber"):
                 return {"success": False, "error": "需要安装pdfplumber: pip install pdfplumber"}
 
             import pdfplumber
@@ -206,7 +165,7 @@ class PDFOperations:
             {success, tables: [{page, data, rows, cols}], table_count, message}
         """
         try:
-            if not _check_pdfplumber():
+            if not check_import("pdfplumber"):
                 return {"success": False, "error": "需要安装pdfplumber: pip install pdfplumber"}
 
             import pdfplumber
@@ -292,7 +251,7 @@ class PDFOperations:
             {success, images: [{page, path, size}], image_count, message}
         """
         try:
-            if not _check_pdfplumber():
+            if not check_import("pdfplumber"):
                 return {"success": False, "error": "需要安装pdfplumber: pip install pdfplumber"}
 
             import pdfplumber
@@ -376,7 +335,7 @@ class PDFOperations:
             {success, outline: [{title, page, level}], message}
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
 
             from pypdf import PdfReader
@@ -448,7 +407,7 @@ class PDFOperations:
             {success, input_count, total_pages, output_path, message}
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
 
             from pypdf import PdfWriter, PdfReader
@@ -514,7 +473,7 @@ class PDFOperations:
             {success, files: [path], file_count, message}
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
 
             from pypdf import PdfWriter, PdfReader
@@ -585,7 +544,7 @@ class PDFOperations:
             {success, extracted_pages, output_path, message}
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
 
             from pypdf import PdfWriter, PdfReader
@@ -644,7 +603,7 @@ class PDFOperations:
             output_path: 输出路径，None表示覆盖原文件
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
 
             from pypdf import PdfWriter, PdfReader
@@ -711,7 +670,7 @@ class PDFOperations:
             output_path: 输出路径，None表示覆盖原文件
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
 
             from pypdf import PdfWriter, PdfReader
@@ -786,7 +745,7 @@ class PDFOperations:
         Note: 简化实现，使用pypdf的注释功能
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
 
             from pypdf import PdfWriter, PdfReader
@@ -885,7 +844,7 @@ class PDFOperations:
             {success, tables_converted, word_path, message}
         """
         try:
-            if not _check_pdfplumber():
+            if not check_import("pdfplumber"):
                 return {"success": False, "error": "需要安装pdfplumber: pip install pdfplumber"}
 
             try:
@@ -988,7 +947,7 @@ class PDFOperations:
             {success, tables_converted, excel_path, message}
         """
         try:
-            if not _check_pdfplumber():
+            if not check_import("pdfplumber"):
                 return {"success": False, "error": "需要安装pdfplumber: pip install pdfplumber"}
 
             try:
@@ -1142,8 +1101,8 @@ class PDFOperations:
             {success, pdfplumber_available, pypdf_available, versions, features, message}
         """
         try:
-            pdfplumber_available = _check_pdfplumber()
-            pypdf_available = _check_pypdf()
+            pdfplumber_available = check_import("pdfplumber")
+            pypdf_available = check_import("pypdf")
 
             versions = {}
             if pdfplumber_available:
@@ -1228,7 +1187,7 @@ class PDFOperations:
             {success, output_path, pages, paragraphs, tables, message}
         """
         try:
-            if not _check_pdfplumber():
+            if not check_import("pdfplumber"):
                 return {"success": False, "error": "需要安装pdfplumber: pip install pdfplumber"}
 
             import pdfplumber
@@ -1420,11 +1379,11 @@ class PDFOperations:
             {success, replacements, output_path, message}
         """
         try:
-            if not _check_pdfplumber():
+            if not check_import("pdfplumber"):
                 return {"success": False, "error": "需要安装pdfplumber: pip install pdfplumber"}
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
-            if not _check_reportlab():
+            if not check_import("reportlab"):
                 return {"success": False, "error": "需要安装reportlab: pip install reportlab"}
 
             import pdfplumber
@@ -1564,11 +1523,11 @@ class PDFOperations:
             {success, redacted_count, output_path, message}
         """
         try:
-            if not _check_pdfplumber():
+            if not check_import("pdfplumber"):
                 return {"success": False, "error": "需要安装pdfplumber: pip install pdfplumber"}
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
-            if not _check_reportlab():
+            if not check_import("reportlab"):
                 return {"success": False, "error": "需要安装reportlab: pip install reportlab"}
 
             import pdfplumber
@@ -1729,9 +1688,9 @@ class PDFOperations:
             {success, output_path, message}
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
-            if not _check_reportlab():
+            if not check_import("reportlab"):
                 return {"success": False, "error": "需要安装reportlab: pip install reportlab"}
 
             from pypdf import PdfReader, PdfWriter
@@ -1834,7 +1793,7 @@ class PDFOperations:
             {success, path, output_path, algorithm, message}
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
 
             from pypdf import PdfReader, PdfWriter
@@ -1904,7 +1863,7 @@ class PDFOperations:
             {success, path, output_path, message}
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
 
             from pypdf import PdfReader, PdfWriter
@@ -1973,7 +1932,7 @@ class PDFOperations:
             {success, fields, field_count, message}
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
 
             from pypdf import PdfReader
@@ -2058,7 +2017,7 @@ class PDFOperations:
             {success, path, output_path, fields_filled, message}
         """
         try:
-            if not _check_pypdf():
+            if not check_import("pypdf"):
                 return {"success": False, "error": "需要安装pypdf: pip install pypdf"}
 
             from pypdf import PdfReader, PdfWriter

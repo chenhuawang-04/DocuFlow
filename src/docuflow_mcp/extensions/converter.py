@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Optional, List, Dict, Any
 
 from ..core.registry import register_tool
+from ..utils.deps import check_command
 
 
 class ConverterOperations:
@@ -52,20 +53,6 @@ class ConverterOperations:
         """从文件扩展名检测格式"""
         ext = Path(file_path).suffix.lower().strip('.')
         return ConverterOperations._normalize_format(ext)
-
-    @staticmethod
-    def _check_pandoc() -> bool:
-        """检查pandoc是否可用"""
-        try:
-            result = subprocess.run(
-                ['pandoc', '--version'],
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            return result.returncode == 0
-        except (subprocess.SubprocessError, FileNotFoundError):
-            return False
 
     @staticmethod
     def _run_pandoc(args: List[str]) -> Dict[str, Any]:
@@ -256,7 +243,7 @@ class ConverterOperations:
             {"from": "markdown", "to": "pptx", "desc": "Markdown转PowerPoint"},
         ]
 
-        pandoc_ok = ConverterOperations._check_pandoc()
+        pandoc_ok = check_command("pandoc")
 
         return {
             "success": True,
