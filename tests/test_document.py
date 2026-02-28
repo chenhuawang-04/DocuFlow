@@ -281,8 +281,6 @@ def test_create_styled_document():
     print(f"Markdown 已导出到: {md_path}")
     print("=" * 60)
 
-    return doc_path
-
 
 if __name__ == "__main__":
     test_create_styled_document()

@@ -6,6 +6,7 @@ DocuFlow OCR - 功能测试脚本
 import os
 import sys
 import tempfile
+import pytest
 import shutil
 
 # 添加src路径
@@ -36,12 +37,10 @@ def test_tool_registration():
     print(f"已注册OCR工具: {registered}")
     if missing:
         print(f"未注册工具: {missing}")
-        return False
+        assert False, "未注册工具: ..."
 
     print(f"✓ 所有4个OCR工具已注册")
     print(f"  当前总工具数: {len(tools)}")
-    return True
-
 
 def test_ocr_status():
     """测试OCR状态检查"""
@@ -69,10 +68,10 @@ def test_ocr_status():
     print(f"\n支持的语言: {result.get('supported_languages', [])}")
     print(f"支持的图片格式: {result.get('supported_image_formats', [])}")
 
-    return result.get('success', False)
+    assert result.get('success', False), "OCR状态检查失败"
 
 
-def test_create_test_image():
+def _create_test_image():
     """创建测试图片（如果PIL可用）"""
     try:
         from PIL import Image, ImageDraw, ImageFont
@@ -114,11 +113,11 @@ def test_ocr_image():
     print("=" * 60)
 
     # 创建测试图片
-    image_path, temp_dir = test_create_test_image()
+    image_path, temp_dir = _create_test_image()
 
     if image_path is None:
         print("跳过: PIL未安装，无法创建测试图片")
-        return True  # 不算失败
+        pytest.skip("PIL未安装，无法创建测试图片")
 
     try:
         print(f"创建测试图片: {image_path}")
@@ -137,14 +136,13 @@ def test_ocr_image():
             print(f"置信度: {result.get('confidence', 0):.2f}")
             print(f"识别文本:\n{result.get('text', '')[:200]}")
             print("✓ 图片OCR测试通过!")
-            return True
         else:
             error = result.get('error', '未知错误')
             if 'Tesseract' in error and 'anthropic' in error:
                 print(f"跳过: 没有可用的OCR引擎")
-                return True  # 没有引擎不算测试失败
+                pytest.skip("没有可用的OCR引擎")
             print(f"✗ 识别失败: {error}")
-            return False
+            assert False, "识别失败: ..."
 
     finally:
         if temp_dir:
@@ -171,8 +169,6 @@ def test_confidence_estimation():
         status = "✓" if (conf > 0.5 and "乱码" not in desc) or (conf <= 0.5 and "乱码" in desc) or (conf == 0 and text == "") else "?"
         print(f"  {status} {desc}: {conf:.2f}")
 
-    return True
-
 
 def test_format_detection():
     """测试格式支持"""
@@ -187,8 +183,6 @@ def test_format_detection():
     print("\n支持的语言:")
     for lang, code in OCROperations.LANG_MAP.items():
         print(f"  - {lang}: {code}")
-
-    return True
 
 
 def main():

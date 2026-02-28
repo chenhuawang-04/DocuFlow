@@ -46,12 +46,10 @@ def test_tool_registration():
     print(f"已注册PPT工具: {len(registered)}/{len(ppt_tools)}")
     if missing:
         print(f"未注册工具: {missing}")
-        return False
+        assert False, "未注册工具: ..."
 
     print(f"✓ 所有{len(ppt_tools)}个PPT工具已注册")
     print(f"  当前总工具数: {len(tools)}")
-    return True
-
 
 def test_ppt_status():
     """测试PPT模块状态"""
@@ -72,10 +70,9 @@ def test_ppt_status():
             print("\n支持的功能:")
             for f in features:
                 print(f"  - {f}")
-        return True
     else:
         print(f"✗ 状态检查失败: {result.get('error')}")
-        return False
+        assert False, "状态检查失败: {result.get("
 
 
 def test_ppt_create():
@@ -96,10 +93,9 @@ def test_ppt_create():
 
         if result.get('success'):
             print(f"✓ 创建PPT成功: {ppt_path}")
-            return True
         else:
             print(f"✗ 创建PPT失败: {result.get('error')}")
-            return False
+            assert False, "创建PPT失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -129,10 +125,9 @@ def test_slide_add():
             print(f"✓ 添加幻灯片成功")
             print(f"  幻灯片索引: {result.get('slide_index')}")
             print(f"  布局: {result.get('layout')}")
-            return True
         else:
             print(f"✗ 添加幻灯片失败: {result.get('error')}")
-            return False
+            assert False, "添加幻灯片失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -169,10 +164,9 @@ def test_shape_add_text():
         if result.get('success'):
             print(f"✓ 添加文本框成功")
             print(f"  文本: {result.get('text')}")
-            return True
         else:
             print(f"✗ 添加文本框失败: {result.get('error')}")
-            return False
+            assert False, "添加文本框失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -209,10 +203,9 @@ def test_shape_add_table():
         if result.get('success'):
             print(f"✓ 添加表格成功")
             print(f"  表格大小: {result.get('table_size')}")
-            return True
         else:
             print(f"✗ 添加表格失败: {result.get('error')}")
-            return False
+            assert False, "添加表格失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -245,10 +238,9 @@ def test_shape_add_shape():
         if result.get('success'):
             print(f"✓ 添加形状成功")
             print(f"  形状类型: {result.get('shape_type')}")
-            return True
         else:
             print(f"✗ 添加形状失败: {result.get('error')}")
-            return False
+            assert False, "添加形状失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -277,10 +269,9 @@ def test_ppt_read():
         if result.get('success'):
             print(f"✓ 读取PPT成功")
             print(f"  幻灯片数: {result.get('total_slides')}")
-            return True
         else:
             print(f"✗ 读取PPT失败: {result.get('error')}")
-            return False
+            assert False, "读取PPT失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -310,10 +301,9 @@ def test_ppt_info():
             print(f"✓ 获取PPT信息成功")
             print(f"  幻灯片数: {result.get('total_slides')}")
             print(f"  尺寸: {result.get('dimensions')}")
-            return True
         else:
             print(f"✗ 获取PPT信息失败: {result.get('error')}")
-            return False
+            assert False, "获取PPT信息失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -342,10 +332,9 @@ def test_slide_get_layouts():
             print(f"  可用布局数: {result.get('total_layouts')}")
             for layout in result.get('layouts', [])[:5]:
                 print(f"    - {layout['name']}")
-            return True
         else:
             print(f"✗ 获取布局列表失败: {result.get('error')}")
-            return False
+            assert False, "获取布局列表失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -376,10 +365,9 @@ def test_slide_add_notes():
         if result.get('success'):
             print(f"✓ 添加备注成功")
             print(f"  备注长度: {result.get('notes_length')} 字符")
-            return True
         else:
             print(f"✗ 添加备注失败: {result.get('error')}")
-            return False
+            assert False, "添加备注失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -412,10 +400,9 @@ def test_slide_delete():
             print(f"✓ 删除幻灯片成功")
             print(f"  删除索引: {result.get('deleted_index')}")
             print(f"  剩余幻灯片: {result.get('remaining_slides')}")
-            return True
         else:
             print(f"✗ 删除幻灯片失败: {result.get('error')}")
-            return False
+            assert False, "删除幻灯片失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -445,10 +432,9 @@ def test_master_list():
             masters = result.get('masters', [])
             for m in masters[:2]:  # 只显示前2个
                 print(f"    - {m.get('name')}: {m.get('layout_count')} 个布局")
-            return True
         else:
             print(f"✗ 获取母版列表失败: {result.get('error')}")
-            return False
+            assert False, "获取母版列表失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -477,10 +463,9 @@ def test_master_get_info():
             print(f"  母版名称: {result.get('name')}")
             print(f"  布局数量: {result.get('layout_count')}")
             print(f"  占位符数量: {result.get('placeholder_count')}")
-            return True
         else:
             print(f"✗ 获取母版信息失败: {result.get('error')}")
-            return False
+            assert False, "获取母版信息失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -511,10 +496,9 @@ def test_placeholder_list():
             placeholders = result.get('placeholders', [])
             for p in placeholders[:3]:  # 只显示前3个
                 print(f"    - idx={p.get('idx')}: {p.get('type')}")
-            return True
         else:
             print(f"✗ 获取占位符列表失败: {result.get('error')}")
-            return False
+            assert False, "获取占位符列表失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -541,7 +525,7 @@ def test_placeholder_set():
 
         if not placeholders:
             print("✗ 没有找到占位符")
-            return False
+            assert False, "没有找到占位符"
 
         # 设置第一个占位符的内容
         idx = placeholders[0].get('idx')
@@ -558,10 +542,9 @@ def test_placeholder_set():
             print(f"✓ 设置占位符成功")
             print(f"  占位符索引: {result.get('idx')}")
             print(f"  文本: {result.get('text')}")
-            return True
         else:
             print(f"✗ 设置占位符失败: {result.get('error')}")
-            return False
+            assert False, "设置占位符失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -603,10 +586,9 @@ def test_animation_add():
             print(f"✓ 添加动画成功")
             print(f"  动画效果: {result.get('effect')}")
             print(f"  触发方式: {result.get('trigger')}")
-            return True
         else:
             print(f"✗ 添加动画失败: {result.get('error')}")
-            return False
+            assert False, "添加动画失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -644,10 +626,9 @@ def test_animation_list():
         if result.get('success'):
             print(f"✓ 列出动画成功")
             print(f"  动画数量: {result.get('animation_count')}")
-            return True
         else:
             print(f"✗ 列出动画失败: {result.get('error')}")
-            return False
+            assert False, "列出动画失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -687,10 +668,9 @@ def test_animation_remove():
         if result.get('success'):
             print(f"✓ 删除动画成功")
             print(f"  删除数量: {result.get('removed_count', 'all')}")
-            return True
         else:
             print(f"✗ 删除动画失败: {result.get('error')}")
-            return False
+            assert False, "删除动画失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -725,10 +705,9 @@ def test_chart_add():
             print(f"✓ 添加图表成功")
             print(f"  图表类型: {result.get('chart_type')}")
             print(f"  位置: {result.get('position')}")
-            return True
         else:
             print(f"✗ 添加图表失败: {result.get('error')}")
-            return False
+            assert False, "添加图表失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -760,10 +739,10 @@ def test_chart_list():
         if result.get('success'):
             print(f"✓ 列出图表成功")
             print(f"  图表数量: {result.get('chart_count')}")
-            return result.get('chart_count', 0) > 0
+            assert result.get('chart_count', 0) > 0, "图表数量应大于0"
         else:
             print(f"✗ 列出图表失败: {result.get('error')}")
-            return False
+            assert False, "列出图表失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -796,10 +775,9 @@ def test_chart_get_data():
             print(f"✓ 获取图表数据成功")
             print(f"  图表类型: {result.get('chart_type')}")
             print(f"  分类数: {len(result.get('categories', []))}")
-            return True
         else:
             print(f"✗ 获取图表数据失败: {result.get('error')}")
-            return False
+            assert False, "获取图表数据失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -833,10 +811,9 @@ def test_chart_modify():
         if result.get('success'):
             print(f"✓ 修改图表成功")
             print(f"  修改内容: {result.get('modifications', [])}")
-            return True
         else:
             print(f"✗ 修改图表失败: {result.get('error')}")
-            return False
+            assert False, "修改图表失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -868,10 +845,9 @@ def test_chart_delete():
         if result.get('success'):
             print(f"✓ 删除图表成功")
             print(f"  剩余形状数: {result.get('remaining_shapes')}")
-            return True
         else:
             print(f"✗ 删除图表失败: {result.get('error')}")
-            return False
+            assert False, "删除图表失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)

@@ -72,7 +72,7 @@ def test_validate_format():
                 print(f"       - {issue.get('type')}: {issue.get('expected', '')} vs {issue.get('actual', '')}")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Test 2: Validate with custom rules
     print("\n测试2: 使用自定义规则验证")
@@ -103,13 +103,11 @@ def test_validate_format():
         print(f"     总问题数: {result['total_issues']}")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] validate_format 测试通过")
-    return True
-
 
 def test_validate_auto_fix():
     """Test validate_auto_fix tool"""
@@ -153,7 +151,7 @@ def test_validate_auto_fix():
             print(f"     应用的修正: {', '.join(result['fixes_applied'][:5])}...")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Validate after fix
     print("\n验证修复后:")
@@ -168,13 +166,11 @@ def test_validate_auto_fix():
         print(f"[OK] 问题数已减少: {issues_before} -> {issues_after}")
     else:
         print(f"[FAIL] 问题数未减少")
-        return False
+        assert False, "[FAIL] 问题数未减少"
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] validate_auto_fix 测试通过")
-    return True
-
 
 def test_validate_generate_report():
     """Test validate_generate_report tool"""
@@ -211,7 +207,7 @@ def test_validate_generate_report():
             print(f"     {line}")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Test 2: Generate and save report
     print("\n测试2: 生成报告并保存")
@@ -226,14 +222,12 @@ def test_validate_generate_report():
         print(f"     文件大小: {os.path.getsize(report_file)} 字节")
     else:
         print(f"[FAIL] 报告保存失败")
-        return False
+        assert False, "[FAIL] 报告保存失败"
 
     # Clean up
     os.remove(test_file)
     os.remove(report_file)
     print("\n[OK] validate_generate_report 测试通过")
-    return True
-
 
 def test_validate_check_consistency():
     """Test validate_check_consistency tool"""
@@ -290,13 +284,11 @@ def test_validate_check_consistency():
                             print(f"         · {k}: {v}次")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] validate_check_consistency 测试通过")
-    return True
-
 
 def test_tool_registration():
     """Test that all validation tools are registered"""
@@ -323,10 +315,9 @@ def test_tool_registration():
 
     if all_found:
         print(f"\n[OK] 所有4个验证工具已正确注册")
-        return True
     else:
         print(f"\n[FAIL] 部分工具未注册")
-        return False
+        assert False, "\n[FAIL] 部分工具未注册"
 
 
 def test_integration():
@@ -345,7 +336,7 @@ def test_integration():
 
     if not result.get("success"):
         print(f"[FAIL] 模板创建失败: {result.get('error')}")
-        return False
+        assert False, "[FAIL] 模板创建失败: {result.get("
     print(f"[OK] 文档已创建")
 
     # Step 2: Add some content
@@ -394,13 +385,11 @@ def test_integration():
 
     else:
         print(f"[FAIL] 验证失败")
-        return False
+        assert False, "[FAIL] 验证失败"
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] 集成测试通过")
-    return True
-
 
 def main():
     """Run all tests"""

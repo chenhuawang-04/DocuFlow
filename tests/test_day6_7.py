@@ -59,7 +59,7 @@ def test_batch_format_range():
         print(f"     格式化数量: {result['formatted_count']}")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Test 2: Format large range (performance test)
     print("\n测试: 批量格式化段落 0-19 (性能测试)")
@@ -81,7 +81,7 @@ def test_batch_format_range():
         print(f"     性能: {elapsed:.2f}ms for 20 paragraphs")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Test 3: Invalid range
     print("\n测试: 无效索引范围")
@@ -95,13 +95,11 @@ def test_batch_format_range():
         print(f"[OK] 正确检测到错误: {result.get('error')}")
     else:
         print(f"[FAIL] 应该返回错误但返回成功")
-        return False
+        assert False, "[FAIL] 应该返回错误但返回成功"
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] batch_format_range 测试通过")
-    return True
-
 
 def test_batch_apply_style():
     """Test batch_apply_style tool"""
@@ -129,7 +127,7 @@ def test_batch_apply_style():
         print(f"     应用数量: {result['applied_count']}")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Verify styles were applied
     doc = Document(test_file)
@@ -138,7 +136,7 @@ def test_batch_apply_style():
         print(f"[OK] 验证: 5个段落的样式已正确应用")
     else:
         print(f"[FAIL] 验证失败: 只有 {correct_count}/5 个段落样式正确")
-        return False
+        assert False, "[FAIL] 验证失败: 只有 .../5 个段落样式正确"
 
     # Test 2: Invalid style name
     print("\n测试: 无效样式名称")
@@ -152,13 +150,11 @@ def test_batch_apply_style():
         print(f"[OK] 正确检测到错误: {result.get('error')}")
     else:
         print(f"[FAIL] 应该返回错误但返回成功")
-        return False
+        assert False, "[FAIL] 应该返回错误但返回成功"
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] batch_apply_style 测试通过")
-    return True
-
 
 def test_batch_copy_format():
     """Test batch_copy_format tool (format painter)"""
@@ -199,7 +195,7 @@ def test_batch_copy_format():
         print(f"     复制数量: {result['copied_count']}")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Verify formatting was copied
     doc = Document(test_file)
@@ -222,13 +218,11 @@ def test_batch_copy_format():
         print(f"[FAIL] 验证失败:")
         for name, passed in checks:
             print(f"     - {name}: {'匹配' if passed else '不匹配'}")
-        return False
+        assert False, "...: {"
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] batch_copy_format 测试通过")
-    return True
-
 
 def test_batch_replace_format():
     """Test batch_replace_format tool"""
@@ -267,10 +261,10 @@ def test_batch_replace_format():
 
         if result['replaced_count'] != 3:
             print(f"[FAIL] 期望替换3个段落，实际替换 {result['replaced_count']} 个")
-            return False
+            assert False, "[FAIL] 期望替换3个段落，实际替换 {result["
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Test 2: Search for style with no matches
     print("\n测试: 搜索不存在的样式段落")
@@ -284,13 +278,11 @@ def test_batch_replace_format():
         print(f"[OK] 正确处理: {result['message']}")
     else:
         print(f"[FAIL] 处理错误")
-        return False
+        assert False, "[FAIL] 处理错误"
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] batch_replace_format 测试通过")
-    return True
-
 
 def test_performance_100_paragraphs():
     """Test performance with 100 paragraphs"""
@@ -329,7 +321,7 @@ def test_performance_100_paragraphs():
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
         os.remove(test_file)
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Test 2: Apply style to 50 paragraphs (every other paragraph)
     print("\n测试2: 批量应用样式到50个段落")
@@ -352,7 +344,7 @@ def test_performance_100_paragraphs():
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
         os.remove(test_file)
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Test 3: Copy format to 49 paragraphs
     print("\n测试3: 格式刷复制到49个段落")
@@ -375,13 +367,11 @@ def test_performance_100_paragraphs():
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
         os.remove(test_file)
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] 性能测试通过")
-    return True
-
 
 def test_tool_registration():
     """Test that all batch tools are registered"""
@@ -408,10 +398,9 @@ def test_tool_registration():
 
     if all_found:
         print(f"\n[OK] 所有4个批量操作工具已正确注册")
-        return True
     else:
         print(f"\n[FAIL] 部分工具未注册")
-        return False
+        assert False, "\n[FAIL] 部分工具未注册"
 
 
 def main():

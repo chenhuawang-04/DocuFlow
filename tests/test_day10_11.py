@@ -57,10 +57,9 @@ def test_tool_registration():
 
     if all_found:
         print(f"\n[OK] 所有6个高级工具已正确注册")
-        return True
     else:
         print(f"\n[FAIL] 部分工具未注册")
-        return False
+        assert False, "\n[FAIL] 部分工具未注册"
 
 
 def test_doc_compare():
@@ -110,7 +109,7 @@ def test_doc_compare():
                 print(f"       相似度: {mod['similarity']}")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Test 2: Comparison with report
     print("\n测试2: 生成对比报告")
@@ -125,15 +124,13 @@ def test_doc_compare():
         print(f"     文件大小: {os.path.getsize(report_path)} 字节")
     else:
         print(f"[FAIL] 报告生成失败")
-        return False
+        assert False, "[FAIL] 报告生成失败"
 
     # Clean up
     os.remove(doc1_path)
     os.remove(doc2_path)
     os.remove(report_path)
     print("\n[OK] doc_compare 测试通过")
-    return True
-
 
 def test_doc_analyze_statistics():
     """Test doc_analyze_statistics tool"""
@@ -201,7 +198,7 @@ def test_doc_analyze_statistics():
                 print(f"       {style}: {count}次")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Test 2: Detailed statistics
     print("\n测试2: 详细统计")
@@ -221,13 +218,11 @@ def test_doc_analyze_statistics():
             print(f"     第一个表格: {detailed['tables'][0]['rows']}行 x {detailed['tables'][0]['columns']}列")
     else:
         print(f"[FAIL] 详细统计失败")
-        return False
+        assert False, "[FAIL] 详细统计失败"
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] doc_analyze_statistics 测试通过")
-    return True
-
 
 def test_doc_metadata():
     """Test doc_get_metadata and doc_set_metadata tools"""
@@ -257,7 +252,7 @@ def test_doc_metadata():
         print(f"[OK] 元数据已设置")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Test 2: Get metadata
     print("\n测试2: 获取元数据")
@@ -280,16 +275,14 @@ def test_doc_metadata():
             print(f"\n[OK] 元数据验证成功")
         else:
             print(f"\n[FAIL] 元数据值不匹配")
-            return False
+            assert False, "\n[FAIL] 元数据值不匹配"
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] 元数据工具测试通过")
-    return True
-
 
 def test_doc_extract_links():
     """Test doc_extract_links tool"""
@@ -320,13 +313,11 @@ def test_doc_extract_links():
                 print(f"       URL: {link['url']}")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] doc_extract_links 测试通过")
-    return True
-
 
 def test_doc_word_frequency():
     """Test doc_word_frequency tool"""
@@ -358,7 +349,7 @@ def test_doc_word_frequency():
             print(f"       {item['word']}: {item['count']}次")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Test 2: With minimum length filter
     print("\n测试2: 带最小长度过滤")
@@ -376,13 +367,11 @@ def test_doc_word_frequency():
             print(f"       {item['word']}: {item['count']}次")
     else:
         print(f"[FAIL] {result.get('error', 'Unknown error')}")
-        return False
+        assert False, "[FAIL] {result.get("
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] doc_word_frequency 测试通过")
-    return True
-
 
 def test_integration():
     """Integration test: Complete workflow"""
@@ -400,7 +389,7 @@ def test_integration():
 
     if not result.get("success"):
         print(f"[FAIL] 模板创建失败: {result.get('error')}")
-        return False
+        assert False, "[FAIL] 模板创建失败: {result.get("
     print(f"[OK] 文档已创建")
 
     # Step 2: Add content
@@ -438,7 +427,7 @@ def test_integration():
         print(f"     标题: {result['counts']['headings']}")
     else:
         print(f"[FAIL] 统计失败")
-        return False
+        assert False, "[FAIL] 统计失败"
 
     # Step 5: Word frequency
     print("\n步骤5: 词频分析")
@@ -452,7 +441,7 @@ def test_integration():
         print(f"     总词数: {result['total_words']}")
     else:
         print(f"[FAIL] 词频分析失败")
-        return False
+        assert False, "[FAIL] 词频分析失败"
 
     # Step 6: Validate format
     print("\n步骤6: 验证格式")
@@ -465,13 +454,11 @@ def test_integration():
         print(f"[OK] 格式验证完成: 符合={result['compliant']}")
     else:
         print(f"[FAIL] 验证失败")
-        return False
+        assert False, "[FAIL] 验证失败"
 
     # Clean up
     os.remove(test_file)
     print("\n[OK] 集成测试通过")
-    return True
-
 
 def main():
     """Run all tests"""

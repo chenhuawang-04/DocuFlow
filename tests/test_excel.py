@@ -48,12 +48,10 @@ def test_tool_registration():
     print(f"已注册Excel工具: {len(registered)}/{len(excel_tools)}")
     if missing:
         print(f"未注册工具: {missing}")
-        return False
+        assert False, "未注册工具: ..."
 
     print(f"✓ 所有32个Excel工具已注册")
     print(f"  当前总工具数: {len(tools)}")
-    return True
-
 
 def test_excel_status():
     """测试Excel状态检查"""
@@ -73,7 +71,7 @@ def test_excel_status():
         for feature in result['features']:
             print(f"  - {feature}")
 
-    return result.get('success', False)
+    assert result.get('success', False), "Excel状态检查失败"
 
 
 def test_create_and_read():
@@ -95,7 +93,7 @@ def test_create_and_read():
 
         if not result.get('success'):
             print(f"✗ 创建失败: {result.get('error')}")
-            return False
+            assert False, "创建失败: {result.get("
 
         print(f"✓ 创建成功: {xlsx_path}")
         print(f"  工作表: {result.get('sheets')}")
@@ -107,9 +105,7 @@ def test_create_and_read():
             print(f"  工作表数: {info.get('sheet_count')}")
         else:
             print(f"✗ 读取信息失败: {info.get('error')}")
-            return False
-
-        return True
+            assert False, "读取信息失败: {info.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -136,7 +132,7 @@ def test_cell_operations():
         )
         if not result.get('success'):
             print(f"✗ 写入单元格失败: {result.get('error')}")
-            return False
+            assert False, "写入单元格失败: {result.get("
         print("✓ 写入单元格 A1 成功")
 
         # 写入数据区域
@@ -153,7 +149,7 @@ def test_cell_operations():
         )
         if not result.get('success'):
             print(f"✗ 写入数据区域失败: {result.get('error')}")
-            return False
+            assert False, "写入数据区域失败: {result.get("
         print(f"✓ 写入数据区域成功: {len(data)} 行")
 
         # 读取单元格
@@ -165,7 +161,7 @@ def test_cell_operations():
             print(f"✓ 读取单元格成功: {result.get('value')}")
         else:
             print(f"✗ 读取单元格失败")
-            return False
+            assert False, "读取单元格失败"
 
         # 读取区域
         result = ExcelOperations.read_cell(
@@ -176,9 +172,7 @@ def test_cell_operations():
             print(f"✓ 读取区域成功: {result.get('rows')} 行")
         else:
             print(f"✗ 读取区域失败")
-            return False
-
-        return True
+            assert False, "读取区域失败"
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -216,7 +210,7 @@ def test_formatting():
             print("✓ 格式化标题行成功")
         else:
             print(f"✗ 格式化失败: {result.get('error')}")
-            return False
+            assert False, "格式化失败: {result.get("
 
         # 合并单元格
         result = ExcelOperations.merge_cell(
@@ -227,9 +221,7 @@ def test_formatting():
             print("✓ 合并单元格成功")
         else:
             print(f"✗ 合并单元格失败: {result.get('error')}")
-            return False
-
-        return True
+            assert False, "合并单元格失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -267,9 +259,7 @@ def test_formula():
             print(f"✓ 公式设置成功: {result.get('formula')}")
         else:
             print(f"✗ 公式设置失败: {result.get('error')}")
-            return False
-
-        return True
+            assert False, "公式设置失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -300,7 +290,7 @@ def test_sheet_operations():
             print("✓ 添加工作表成功")
         else:
             print(f"✗ 添加失败: {result.get('error')}")
-            return False
+            assert False, "添加失败: {result.get("
 
         # 重命名工作表
         result = ExcelOperations.rename_sheet(xlsx_path, "新工作表", "报表")
@@ -309,7 +299,7 @@ def test_sheet_operations():
             print("✓ 重命名工作表成功")
         else:
             print(f"✗ 重命名失败: {result.get('error')}")
-            return False
+            assert False, "重命名失败: {result.get("
 
         # 复制工作表
         result = ExcelOperations.copy_sheet(xlsx_path, "报表", "报表副本")
@@ -318,14 +308,12 @@ def test_sheet_operations():
             print("✓ 复制工作表成功")
         else:
             print(f"✗ 复制失败: {result.get('error')}")
-            return False
+            assert False, "复制失败: {result.get("
 
         # 列出最终结果
         result = ExcelOperations.list_sheets(xlsx_path)
         assert isinstance(result, dict), "Expected dict result"
         print(f"最终工作表: {result.get('sheets')}")
-
-        return True
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -360,7 +348,7 @@ def test_row_col_operations():
             print("✓ 插入行成功")
         else:
             print(f"✗ 插入行失败: {result.get('error')}")
-            return False
+            assert False, "插入行失败: {result.get("
 
         # 插入列
         result = ExcelOperations.insert_col(xlsx_path, col="B")
@@ -369,7 +357,7 @@ def test_row_col_operations():
             print("✓ 插入列成功")
         else:
             print(f"✗ 插入列失败: {result.get('error')}")
-            return False
+            assert False, "插入列失败: {result.get("
 
         # 删除行
         result = ExcelOperations.delete_row(xlsx_path, row=2)
@@ -378,9 +366,7 @@ def test_row_col_operations():
             print("✓ 删除行成功")
         else:
             print(f"✗ 删除行失败: {result.get('error')}")
-            return False
-
-        return True
+            assert False, "删除行失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -422,10 +408,9 @@ def test_excel_to_word():
             print(f"✓ Excel表格插入Word成功")
             print(f"  表格大小: {result.get('rows')}x{result.get('cols')}")
             print(f"  输出文件: {docx_path}")
-            return True
         else:
             print(f"✗ 插入失败: {result.get('error')}")
-            return False
+            assert False, "插入失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -463,10 +448,9 @@ def test_formula_batch():
 
         if result.get('success'):
             print(f"✓ 批量公式设置成功: {result.get('cells_updated')} 个单元格")
-            return True
         else:
             print(f"✗ 批量公式失败: {result.get('error')}")
-            return False
+            assert False, "批量公式失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -503,10 +487,9 @@ def test_formula_quick():
 
         if result.get('success'):
             print(f"✓ 快捷函数成功: {result.get('formula')}")
-            return True
         else:
             print(f"✗ 快捷函数失败: {result.get('error')}")
-            return False
+            assert False, "快捷函数失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -545,10 +528,9 @@ def test_data_sort():
 
         if result.get('success'):
             print(f"✓ 排序成功: {result.get('rows_sorted')} 行")
-            return True
         else:
             print(f"✗ 排序失败: {result.get('error')}")
-            return False
+            assert False, "排序失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -582,10 +564,9 @@ def test_data_validate():
 
         if result.get('success'):
             print("✓ 数据验证（下拉列表）设置成功")
-            return True
         else:
             print(f"✗ 数据验证失败: {result.get('error')}")
-            return False
+            assert False, "数据验证失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -627,10 +608,9 @@ def test_stats_summary():
             print(f"  最大: {stats.get('max')}")
             print(f"  最小: {stats.get('min')}")
             print(f"  计数: {stats.get('count')}")
-            return True
         else:
             print(f"✗ 统计摘要失败: {result.get('error')}")
-            return False
+            assert False, "统计摘要失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -667,10 +647,9 @@ def test_conditional_format():
 
         if result.get('success'):
             print("✓ 条件格式（色阶）设置成功")
-            return True
         else:
             print(f"✗ 条件格式失败: {result.get('error')}")
-            return False
+            assert False, "条件格式失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -711,10 +690,9 @@ def test_chart_create():
 
         if result.get('success'):
             print(f"✓ 图表创建成功: {result.get('type')}")
-            return True
         else:
             print(f"✗ 图表创建失败: {result.get('error')}")
-            return False
+            assert False, "图表创建失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)

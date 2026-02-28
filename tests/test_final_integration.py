@@ -98,18 +98,16 @@ class IntegrationTest:
             "title": "Test Document"
         })
         if not result.get("success"):
-            return False
+            assert False, "test failed"
 
         # Read document
         result = dispatch_tool("doc_read", {
             "path": test_file
         })
         if not result.get("success"):
-            return False
+            assert False, "test failed"
 
         os.remove(test_file)
-        return True
-
     def test_document_info(self):
         """Test doc_info"""
         test_file = os.path.join(self.test_dir, "test_info.docx")
@@ -596,7 +594,7 @@ class IntegrationTest:
             "title": "Complete Test Document"
         })
         if not result1.get("success"):
-            return False
+            assert False, "test failed"
 
         # Step 2: Add content structure
         dispatch_tool("heading_add", {
@@ -631,7 +629,7 @@ class IntegrationTest:
             "keywords": "test,integration,workflow"
         })
         if not result4.get("success"):
-            return False
+            assert False, "test failed"
 
         # Step 5: Analyze statistics
         result5 = dispatch_tool("doc_analyze_statistics", {
@@ -639,7 +637,7 @@ class IntegrationTest:
             "detailed": True
         })
         if not result5.get("success"):
-            return False
+            assert False, "test failed"
 
         # Step 6: Validate format
         result6 = dispatch_tool("validate_format", {
@@ -647,18 +645,16 @@ class IntegrationTest:
             "preset_rules": "mba_thesis"
         })
         if not result6.get("success"):
-            return False
+            assert False, "test failed"
 
         # Step 7: Export to markdown
         result7 = dispatch_tool("export_to_markdown", {
             "path": test_file
         })
         if not result7.get("success"):
-            return False
+            assert False, "test failed"
 
         os.remove(test_file)
-        return True
-
     # ========== Tool Registration Test ==========
 
     def test_all_tools_registered(self):
@@ -669,7 +665,7 @@ class IntegrationTest:
         min_expected = 140
         if len(tools) < min_expected:
             print(f"  警告: 预期至少 {min_expected} 个工具，实际找到 {len(tools)} 个")
-            return False
+            assert False, "警告: 预期至少 ... 个工具，实际找到 ... 个"
 
         # Check critical tools exist
         critical_tools = [
@@ -683,9 +679,7 @@ class IntegrationTest:
         for tool in critical_tools:
             if tool not in tools:
                 print(f"  错误: 关键工具 '{tool}' 未注册")
-                return False
-
-        return True
+                assert False, "错误: 关键工具"
 
 
 def main():

@@ -36,12 +36,10 @@ def test_tool_registration():
     print(f"已注册转换工具: {registered}")
     if missing:
         print(f"未注册工具: {missing}")
-        return False
+        assert False, "未注册工具: ..."
 
     print(f"✓ 所有4个转换工具已注册")
     print(f"  当前总工具数: {len(tools)}")
-    return True
-
 
 def test_get_formats():
     """测试获取支持格式"""
@@ -61,7 +59,7 @@ def test_get_formats():
         for conv in result['popular_conversions'][:5]:
             print(f"  - {conv['from']} -> {conv['to']}: {conv['desc']}")
 
-    return result.get('success', False)
+    assert result.get('success', False), "获取格式列表失败"
 
 
 def test_markdown_to_html():
@@ -113,13 +111,12 @@ def test_markdown_to_html():
                 print(f"HTML文件大小: {len(html_content)} 字符")
                 print(f"包含<h1>: {'<h1>' in html_content or '<h1 ' in html_content}")
                 print(f"✓ 转换成功!")
-                return True
             else:
                 print("✗ 输出文件不存在")
-                return False
+                assert False, "输出文件不存在"
         else:
             print(f"✗ 转换失败: {result.get('error', '未知错误')}")
-            return False
+            assert False, "转换失败: {result.get("
 
     finally:
         # 清理临时目录
@@ -168,13 +165,12 @@ def test_markdown_to_docx():
                 file_size = os.path.getsize(docx_path)
                 print(f"Word文件大小: {file_size} 字节")
                 print(f"✓ 转换成功!")
-                return True
             else:
                 print("✗ 输出文件不存在")
-                return False
+                assert False, "输出文件不存在"
         else:
             print(f"✗ 转换失败: {result.get('error', '未知错误')}")
-            return False
+            assert False, "转换失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -214,13 +210,12 @@ def test_batch_conversion():
 
         if result.get('success'):
             print("✓ 批量转换成功!")
-            return True
         else:
             print("✗ 部分转换失败")
             for r in result.get('results', []):
                 if not r.get('success'):
                     print(f"  失败: {r.get('error', '未知')}")
-            return False
+            assert False, "失败: {r.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -251,7 +246,7 @@ def test_format_detection():
         if normalized != expected:
             all_pass = False
 
-    return all_pass
+    assert all_pass, "部分格式检测不匹配"
 
 
 def main():

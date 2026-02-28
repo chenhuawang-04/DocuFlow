@@ -46,12 +46,10 @@ def test_tool_registration():
     print(f"已注册PDF工具: {len(registered)}/{len(pdf_tools)}")
     if missing:
         print(f"未注册工具: {missing}")
-        return False
+        assert False, "未注册工具: ..."
 
     print(f"✓ 所有15个PDF工具已注册")
     print(f"  当前总工具数: {len(tools)}")
-    return True
-
 
 def test_pdf_status():
     """测试PDF状态检查"""
@@ -75,7 +73,7 @@ def test_pdf_status():
         for feature in result['features']:
             print(f"  - {feature}")
 
-    return result.get('success', False)
+    assert result.get('success', False), "PDF状态检查失败"
 
 
 def create_test_pdf(temp_dir: str) -> str:
@@ -123,7 +121,7 @@ def test_pdf_info():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         # 获取信息
         result = PDFOperations.get_info(pdf_path)
@@ -135,10 +133,9 @@ def test_pdf_info():
             print(f"  文件大小: {result.get('file_size_mb')} MB")
             if result.get('metadata'):
                 print(f"  元数据: {result.get('metadata')}")
-            return True
         else:
             print(f"✗ 获取信息失败: {result.get('error')}")
-            return False
+            assert False, "获取信息失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -157,7 +154,7 @@ def test_extract_text():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         # 提取文本
         result = PDFOperations.extract_text(pdf_path)
@@ -167,10 +164,9 @@ def test_extract_text():
             print(f"✓ 文本提取成功")
             print(f"  提取页数: {result.get('page_count')}")
             print(f"  总字符数: {result.get('total_chars')}")
-            return True
         else:
             print(f"✗ 文本提取失败: {result.get('error')}")
-            return False
+            assert False, "文本提取失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -189,7 +185,7 @@ def test_extract_tables():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         # 提取表格
         result = PDFOperations.extract_tables(pdf_path)
@@ -198,10 +194,9 @@ def test_extract_tables():
         if result.get('success'):
             print(f"✓ 表格提取成功")
             print(f"  找到表格数: {result.get('table_count')}")
-            return True
         else:
             print(f"✗ 表格提取失败: {result.get('error')}")
-            return False
+            assert False, "表格提取失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -220,7 +215,7 @@ def test_get_outline():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         # 获取大纲
         result = PDFOperations.get_outline(pdf_path)
@@ -229,10 +224,9 @@ def test_get_outline():
         if result.get('success'):
             print(f"✓ 获取大纲成功")
             print(f"  书签数: {result.get('outline_count')}")
-            return True
         else:
             print(f"✗ 获取大纲失败: {result.get('error')}")
-            return False
+            assert False, "获取大纲失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -260,7 +254,7 @@ def test_merge():
 
         if not pdf1 or not pdf2:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         output_path = os.path.join(temp_dir, "merged.pdf")
 
@@ -275,10 +269,9 @@ def test_merge():
             print(f"✓ PDF合并成功")
             print(f"  合并文件数: {result.get('input_count')}")
             print(f"  总页数: {result.get('total_pages')}")
-            return True
         else:
             print(f"✗ PDF合并失败: {result.get('error')}")
-            return False
+            assert False, "PDF合并失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -297,7 +290,7 @@ def test_split():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         output_dir = os.path.join(temp_dir, "split_output")
 
@@ -311,10 +304,9 @@ def test_split():
         if result.get('success'):
             print(f"✓ PDF拆分成功")
             print(f"  生成文件数: {result.get('file_count')}")
-            return True
         else:
             print(f"✗ PDF拆分失败: {result.get('error')}")
-            return False
+            assert False, "PDF拆分失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -333,7 +325,7 @@ def test_extract_pages():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         output_path = os.path.join(temp_dir, "extracted.pdf")
 
@@ -347,10 +339,9 @@ def test_extract_pages():
         if result.get('success'):
             print(f"✓ 页面提取成功")
             print(f"  提取页码: {result.get('extracted_pages')}")
-            return True
         else:
             print(f"✗ 页面提取失败: {result.get('error')}")
-            return False
+            assert False, "页面提取失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -369,7 +360,7 @@ def test_rotate():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         output_path = os.path.join(temp_dir, "rotated.pdf")
 
@@ -385,10 +376,9 @@ def test_rotate():
             print(f"✓ 页面旋转成功")
             print(f"  旋转页数: {result.get('rotated_pages')}")
             print(f"  旋转角度: {result.get('angle')}°")
-            return True
         else:
             print(f"✗ 页面旋转失败: {result.get('error')}")
-            return False
+            assert False, "页面旋转失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -407,7 +397,7 @@ def test_delete_pages():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         output_path = os.path.join(temp_dir, "deleted.pdf")
 
@@ -422,10 +412,9 @@ def test_delete_pages():
             print(f"✓ 页面删除成功")
             print(f"  删除页数: {len(result.get('deleted_pages', []))}")
             print(f"  剩余页数: {result.get('remaining_pages')}")
-            return True
         else:
             print(f"✗ 页面删除失败: {result.get('error')}")
-            return False
+            assert False, "页面删除失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -444,7 +433,7 @@ def test_watermark():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         output_path = os.path.join(temp_dir, "watermarked.pdf")
 
@@ -461,10 +450,9 @@ def test_watermark():
             print(f"✓ 添加水印成功")
             print(f"  水印文字: {result.get('watermark')}")
             print(f"  水印页数: {result.get('watermarked_pages')}")
-            return True
         else:
             print(f"✗ 添加水印失败: {result.get('error')}")
-            return False
+            assert False, "添加水印失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -483,7 +471,7 @@ def test_pdf_to_text():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         output_path = os.path.join(temp_dir, "output.txt")
 
@@ -498,10 +486,9 @@ def test_pdf_to_text():
             print(f"  字符数: {result.get('chars')}")
             if os.path.exists(output_path):
                 print(f"  输出文件: {output_path}")
-            return True
         else:
             print(f"✗ PDF转文本失败: {result.get('error')}")
-            return False
+            assert False, "PDF转文本失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -520,7 +507,7 @@ def test_to_editable():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         docx_path = os.path.join(temp_dir, "editable.docx")
 
@@ -536,10 +523,9 @@ def test_to_editable():
             print(f"  输出文件: {result.get('output_path')}")
             print(f"  页数: {result.get('pages')}")
             print(f"  段落数: {result.get('paragraphs')}")
-            return True
         else:
             print(f"✗ PDF转可编辑文档失败: {result.get('error')}")
-            return False
+            assert False, "PDF转可编辑文档失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -558,7 +544,7 @@ def test_annotate_text():
         pdf_path = create_test_pdf(temp_dir)
         if not pdf_path:
             print("✗ 无法创建测试PDF")
-            return False
+            assert False, "无法创建测试PDF"
 
         output_path = os.path.join(temp_dir, "annotated.pdf")
 
@@ -577,10 +563,9 @@ def test_annotate_text():
             print(f"✓ 添加文字注释成功")
             print(f"  文字: {result.get('text')}")
             print(f"  位置: {result.get('position')}")
-            return True
         else:
             print(f"✗ 添加文字注释失败: {result.get('error')}")
-            return False
+            assert False, "添加文字注释失败: {result.get("
 
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -612,12 +597,10 @@ def test_tool_registration_edit():
     print(f"已注册PDF编辑工具: {len(registered)}/{len(edit_tools)}")
     if missing:
         print(f"未注册工具: {missing}")
-        return False
+        assert False, "未注册工具: ..."
 
     print(f"✓ 所有4个PDF编辑工具已注册")
     print(f"  当前总工具数: {len(tools)}")
-    return True
-
 
 def main():
     """运行所有测试"""
