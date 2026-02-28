@@ -197,7 +197,7 @@ class OCROperations:
 
         # 调用Claude Vision API
         message = client.messages.create(
-            model=model or "claude-sonnet-4-20250514",
+            model=model or "claude-opus-4-6",
             max_tokens=4096,
             messages=[
                 {
