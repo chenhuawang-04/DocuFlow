@@ -170,9 +170,9 @@ class OCROperations:
         import anthropic
 
         # 获取API key
-        key = api_key or os.environ.get('ANTHROPIC_API_KEY')
+        key = api_key or os.environ.get('ANTHROPIC_AUTH_TOKEN') or os.environ.get('ANTHROPIC_API_KEY')
         if not key:
-            raise ValueError("需要提供ANTHROPIC_API_KEY")
+            raise ValueError("需要提供ANTHROPIC_AUTH_TOKEN")
 
         client = anthropic.Anthropic(api_key=key)
 
@@ -531,7 +531,7 @@ class OCROperations:
             },
             "claude": {
                 "available": check_import("anthropic"),
-                "api_key_set": bool(os.environ.get('ANTHROPIC_API_KEY')),
+                "api_key_set": bool(os.environ.get('ANTHROPIC_AUTH_TOKEN') or os.environ.get('ANTHROPIC_API_KEY')),
                 "description": "Claude Vision AI，需要API密钥",
                 "best_for": "复杂布局、手写体、需要理解的文档"
             }
