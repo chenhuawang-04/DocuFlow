@@ -103,6 +103,10 @@ def dispatch_tool(name: str, args: dict) -> dict:
         'template', 'path1', 'path2', 'html_source',
         'source', 'target', 'reference_doc', 'css',
     }
+    # 列表路径参数（每个元素都需要校验）
+    _LIST_PATH_PARAMS = {
+        'paths', 'sources',
+    }
     # 允许 HTML 内容（非路径）的参数名
     _HTML_CONTENT_PARAMS = {'html_source', 'html_sources'}
 
@@ -114,6 +118,25 @@ def dispatch_tool(name: str, args: dict) -> dict:
                 if param_name in _HTML_CONTENT_PARAMS and val.strip().startswith('<'):
                     continue
                 args[param_name] = validate_path(val)
+        # 校验列表路径参数
+        for param_name in _LIST_PATH_PARAMS:
+            if param_name in args and isinstance(args[param_name], list):
+                validated = []
+                for item in args[param_name]:
+                    if isinstance(item, str):
+                        validated.append(validate_path(item))
+                    else:
+                        validated.append(item)
+                args[param_name] = validated
+        # 校验 html_sources 列表（允许 HTML 内容）
+        if 'html_sources' in args and isinstance(args['html_sources'], list):
+            validated = []
+            for item in args['html_sources']:
+                if isinstance(item, str) and not item.strip().startswith('<'):
+                    validated.append(validate_path(item))
+                else:
+                    validated.append(item)
+            args['html_sources'] = validated
     except PathValidationError as e:
         return {
             "success": False,

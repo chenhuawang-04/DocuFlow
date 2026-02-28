@@ -1652,9 +1652,10 @@ class PDFOperations:
                         overlay_reader = PdfReader(overlay_buffer)
                         overlay_page = overlay_reader.pages[0]
 
-                        page.merge_page(overlay_page)
-
-                    writer.add_page(page)
+                        writer.add_page(page)
+                        writer.pages[-1].merge_page(overlay_page)
+                    else:
+                        writer.add_page(page)
 
             # 创建输出目录
             out_dir = os.path.dirname(output_path)
@@ -1765,9 +1766,10 @@ class PDFOperations:
                     overlay_reader = PdfReader(overlay_buffer)
                     overlay_page = overlay_reader.pages[0]
 
-                    pdf_page.merge_page(overlay_page)
-
-                writer.add_page(pdf_page)
+                    writer.add_page(pdf_page)
+                    writer.pages[-1].merge_page(overlay_page)
+                else:
+                    writer.add_page(pdf_page)
 
             # 创建输出目录
             out_dir = os.path.dirname(output_path)
