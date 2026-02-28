@@ -426,6 +426,7 @@ def main():
     for name, test_func in tests:
         try:
             result = test_func()
+            assert isinstance(result, dict), "Expected dict result"
             results.append((name, result))
         except Exception as e:
             print(f"\n[ERROR] 测试 '{name}' 出现异常: {str(e)}")

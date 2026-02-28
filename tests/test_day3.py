@@ -305,6 +305,7 @@ def test_integration():
 
     print("\n4. 读取文档信息...")
     result = dispatch_tool("doc_info", {"path": test_file})
+    assert isinstance(result, dict), "Expected dict result"
     if result.get("success"):
         stats = result.get("statistics", {})
         print(f"   [OK] 段落数: {stats.get('paragraph_count')}")

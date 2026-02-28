@@ -17,6 +17,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
 
 from docuflow_mcp.core.registry import dispatch_tool, get_all_registered_tools
 from docx import Document
+from docx.shared import Pt
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 
 def print_section(title):
@@ -414,14 +416,6 @@ def test_tool_registration():
 
 def main():
     """Run all tests"""
-    # Import necessary modules for testing
-    from docx.shared import Pt
-    from docx.enum.text import WD_ALIGN_PARAGRAPH
-
-    # Make them available globally for test functions
-    globals()['Pt'] = Pt
-    globals()['WD_ALIGN_PARAGRAPH'] = WD_ALIGN_PARAGRAPH
-
     print("\n" + "="*60)
     print("  DocuFlow MCP - Day 6-7 批量操作测试")
     print("="*60)
@@ -444,6 +438,7 @@ def main():
     for name, test_func in tests:
         try:
             result = test_func()
+            assert isinstance(result, dict), "Expected dict result"
             results.append((name, result))
         except Exception as e:
             print(f"\n[ERROR] 测试 '{name}' 出现异常: {str(e)}")

@@ -91,6 +91,7 @@ def test_middleware_system():
     # 测试未知工具
     print("\n6. 测试未知工具...")
     result = dispatch_tool("unknown_tool", {"arg": "value"})
+    assert isinstance(result, dict), "Expected dict result"
 
     if not result.get("success") and result.get("error_code") == "TOOL_NOT_FOUND":
         print("   [OK] 正确处理未知工具")

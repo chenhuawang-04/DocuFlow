@@ -7,13 +7,9 @@ import os
 import sys
 import tempfile
 import shutil
-import io
-
-# 设置stdout为utf-8编码
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # 添加src路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from docuflow_mcp.extensions.pdf import PDFOperations
 from docuflow_mcp.core.registry import get_all_registered_tools
@@ -64,6 +60,7 @@ def test_pdf_status():
     print("=" * 60)
 
     result = PDFOperations.get_status()
+    assert isinstance(result, dict), "Expected dict result"
 
     print(f"pdfplumber可用: {result.get('pdfplumber_available', False)}")
     print(f"pypdf可用: {result.get('pypdf_available', False)}")
@@ -130,6 +127,7 @@ def test_pdf_info():
 
         # 获取信息
         result = PDFOperations.get_info(pdf_path)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 获取PDF信息成功")
@@ -163,6 +161,7 @@ def test_extract_text():
 
         # 提取文本
         result = PDFOperations.extract_text(pdf_path)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 文本提取成功")
@@ -194,6 +193,7 @@ def test_extract_tables():
 
         # 提取表格
         result = PDFOperations.extract_tables(pdf_path)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 表格提取成功")
@@ -224,6 +224,7 @@ def test_get_outline():
 
         # 获取大纲
         result = PDFOperations.get_outline(pdf_path)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 获取大纲成功")

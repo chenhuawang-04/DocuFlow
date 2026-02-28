@@ -7,13 +7,9 @@ import os
 import sys
 import tempfile
 import shutil
-import io
-
-# 设置stdout为utf-8编码
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # 添加src路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from docuflow_mcp.extensions.excel import ExcelOperations
 from docuflow_mcp.core.registry import get_all_registered_tools
@@ -66,6 +62,7 @@ def test_excel_status():
     print("=" * 60)
 
     result = ExcelOperations.get_status()
+    assert isinstance(result, dict), "Expected dict result"
 
     print(f"openpyxl可用: {result.get('openpyxl_available', False)}")
     if result.get('version'):
@@ -293,10 +290,12 @@ def test_sheet_operations():
 
         # 列出工作表
         result = ExcelOperations.list_sheets(xlsx_path)
+        assert isinstance(result, dict), "Expected dict result"
         print(f"初始工作表: {result.get('sheets')}")
 
         # 添加工作表
         result = ExcelOperations.add_sheet(xlsx_path, "新工作表")
+        assert isinstance(result, dict), "Expected dict result"
         if result.get('success'):
             print("✓ 添加工作表成功")
         else:
@@ -305,6 +304,7 @@ def test_sheet_operations():
 
         # 重命名工作表
         result = ExcelOperations.rename_sheet(xlsx_path, "新工作表", "报表")
+        assert isinstance(result, dict), "Expected dict result"
         if result.get('success'):
             print("✓ 重命名工作表成功")
         else:
@@ -313,6 +313,7 @@ def test_sheet_operations():
 
         # 复制工作表
         result = ExcelOperations.copy_sheet(xlsx_path, "报表", "报表副本")
+        assert isinstance(result, dict), "Expected dict result"
         if result.get('success'):
             print("✓ 复制工作表成功")
         else:
@@ -321,6 +322,7 @@ def test_sheet_operations():
 
         # 列出最终结果
         result = ExcelOperations.list_sheets(xlsx_path)
+        assert isinstance(result, dict), "Expected dict result"
         print(f"最终工作表: {result.get('sheets')}")
 
         return True
@@ -353,6 +355,7 @@ def test_row_col_operations():
 
         # 插入行
         result = ExcelOperations.insert_row(xlsx_path, row=2)
+        assert isinstance(result, dict), "Expected dict result"
         if result.get('success'):
             print("✓ 插入行成功")
         else:
@@ -361,6 +364,7 @@ def test_row_col_operations():
 
         # 插入列
         result = ExcelOperations.insert_col(xlsx_path, col="B")
+        assert isinstance(result, dict), "Expected dict result"
         if result.get('success'):
             print("✓ 插入列成功")
         else:
@@ -369,6 +373,7 @@ def test_row_col_operations():
 
         # 删除行
         result = ExcelOperations.delete_row(xlsx_path, row=2)
+        assert isinstance(result, dict), "Expected dict result"
         if result.get('success'):
             print("✓ 删除行成功")
         else:

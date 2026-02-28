@@ -411,5 +411,6 @@ if __name__ == "__main__":
     print("开始转换...")
     converter = HTMLToPPTXConverter(html_content, os.path.dirname(html_path))
     result = converter.convert(output_path)
+    assert isinstance(result, dict), "Expected dict result"
 
     print(f"\n转换结果: {result}")

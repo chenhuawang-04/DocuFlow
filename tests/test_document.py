@@ -8,7 +8,7 @@ import sys
 import os
 
 # 添加源代码路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from docuflow_mcp.document import (
     DocumentOperations,
@@ -26,7 +26,7 @@ from docuflow_mcp.document import (
 def test_create_styled_document():
     """测试创建带有多种样式的文档"""
 
-    doc_path = "E:/Project/DocuFlow/test_output/styled_document.docx"
+    doc_path = os.path.join(os.path.dirname(__file__), "..", "test_output", "styled_document.docx")
 
     # 确保输出目录存在
     os.makedirs(os.path.dirname(doc_path), exist_ok=True)
@@ -38,6 +38,7 @@ def test_create_styled_document():
     # 1. 创建文档
     print("\n[1] 创建文档...")
     result = DocumentOperations.create(doc_path, title="DocuFlow 功能演示文档")
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     # 2. 设置文档属性
@@ -52,21 +53,25 @@ def test_create_styled_document():
     # 3. 设置页面边距
     print("\n[3] 设置页边距...")
     result = PageOperations.set_margins(doc_path, top="2.54cm", bottom="2.54cm", left="3.17cm", right="3.17cm")
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     # 4. 添加页眉
     print("\n[4] 设置页眉...")
     result = HeaderFooterOperations.set_header(doc_path, "DocuFlow MCP - Word 文档处理演示", alignment="center")
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     # 5. 添加页脚页码
     print("\n[5] 添加页码...")
     result = HeaderFooterOperations.add_page_number(doc_path, position="footer", alignment="center")
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     # 6. 添加一级标题
     print("\n[6] 添加一级标题...")
     result = HeadingOperations.add(doc_path, "第一章 文档样式演示", level=1)
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     # 7. 添加普通段落
@@ -85,6 +90,7 @@ def test_create_styled_document():
     # 8. 添加二级标题
     print("\n[8] 添加二级标题...")
     result = HeadingOperations.add(doc_path, "1.1 文本格式演示", level=2)
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     # 9. 添加加粗文本
@@ -127,6 +133,7 @@ def test_create_styled_document():
     # 12. 添加二级标题
     print("\n[12] 添加二级标题 - 列表演示...")
     result = HeadingOperations.add(doc_path, "1.2 列表演示", level=2)
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     # 13. 添加无序列表
@@ -151,6 +158,7 @@ def test_create_styled_document():
     # 15. 添加二级标题
     print("\n[15] 添加二级标题 - 表格演示...")
     result = HeadingOperations.add(doc_path, "1.3 表格演示", level=2)
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     # 16. 添加表格
@@ -188,11 +196,13 @@ def test_create_styled_document():
     # 18. 添加分页符
     print("\n[18] 添加分页符...")
     result = PageOperations.add_page_break(doc_path)
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     # 19. 添加一级标题
     print("\n[19] 添加第二章标题...")
     result = HeadingOperations.add(doc_path, "第二章 高级功能", level=1)
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     # 20. 添加超链接
@@ -207,6 +217,7 @@ def test_create_styled_document():
     # 21. 添加水平线
     print("\n[21] 添加水平分隔线...")
     result = SpecialOperations.add_horizontal_line(doc_path)
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     # 22. 添加引用样式段落
@@ -226,6 +237,7 @@ def test_create_styled_document():
 
     # 23. 添加水平线
     result = SpecialOperations.add_horizontal_line(doc_path)
+    assert isinstance(result, dict), "Expected dict result"
 
     # 24. 添加结束段落
     print("\n[24] 添加结束段落...")
@@ -242,6 +254,7 @@ def test_create_styled_document():
     # 25. 获取文档信息
     print("\n[25] 获取文档信息...")
     result = DocumentOperations.get_info(doc_path)
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    段落数: {result['statistics']['paragraph_count']}")
     print(f"    表格数: {result['statistics']['table_count']}")
     print(f"    字符数: {result['statistics']['character_count']}")
@@ -249,6 +262,7 @@ def test_create_styled_document():
     # 26. 获取文档大纲
     print("\n[26] 获取文档大纲...")
     result = HeadingOperations.get_outline(doc_path)
+    assert isinstance(result, dict), "Expected dict result"
     print("    大纲结构:")
     for item in result['outline']:
         indent = "    " * item['level']
@@ -256,8 +270,9 @@ def test_create_styled_document():
 
     # 27. 导出为 Markdown
     print("\n[27] 导出为 Markdown...")
-    md_path = "E:/Project/DocuFlow/test_output/styled_document.md"
+    md_path = os.path.join(os.path.dirname(__file__), "..", "test_output", "styled_document.md")
     result = ExportOperations.to_markdown(doc_path, md_path)
+    assert isinstance(result, dict), "Expected dict result"
     print(f"    结果: {result}")
 
     print("\n" + "=" * 60)

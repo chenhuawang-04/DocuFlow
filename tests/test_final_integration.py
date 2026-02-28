@@ -59,6 +59,7 @@ class IntegrationTest:
         try:
             start_time = time.time()
             result = func()
+            assert isinstance(result, dict), "Expected dict result"
             elapsed = time.time() - start_time
 
             if result:
@@ -115,6 +116,7 @@ class IntegrationTest:
 
         dispatch_tool("doc_create", {"path": test_file})
         result = dispatch_tool("doc_info", {"path": test_file})
+        assert isinstance(result, dict), "Expected dict result"
 
         os.remove(test_file)
         return result.get("success") and "statistics" in result
@@ -213,6 +215,7 @@ class IntegrationTest:
         dispatch_tool("doc_create", {"path": test_file})
 
         result = dispatch_tool("toc_add", {"path": test_file})
+        assert isinstance(result, dict), "Expected dict result"
 
         os.remove(test_file)
         return result.get("success")

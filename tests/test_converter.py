@@ -7,13 +7,9 @@ import os
 import sys
 import tempfile
 import shutil
-import io
-
-# 设置stdout为utf-8编码
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # 添加src路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from docuflow_mcp.extensions.converter import ConverterOperations
 from docuflow_mcp.core.registry import get_all_registered_tools
@@ -54,6 +50,7 @@ def test_get_formats():
     print("=" * 60)
 
     result = ConverterOperations.get_formats()
+    assert isinstance(result, dict), "Expected dict result"
 
     print(f"Pandoc可用: {result.get('pandoc_available', False)}")
     print(f"输入格式数: {result.get('total_input', 0)}")

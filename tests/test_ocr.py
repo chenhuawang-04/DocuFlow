@@ -7,13 +7,9 @@ import os
 import sys
 import tempfile
 import shutil
-import io
-
-# 设置stdout为utf-8编码
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # 添加src路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from docuflow_mcp.extensions.ocr import OCROperations
 from docuflow_mcp.core.registry import get_all_registered_tools
@@ -54,6 +50,7 @@ def test_ocr_status():
     print("=" * 60)
 
     result = OCROperations.get_status()
+    assert isinstance(result, dict), "Expected dict result"
 
     print(f"状态检查成功: {result.get('success', False)}")
 

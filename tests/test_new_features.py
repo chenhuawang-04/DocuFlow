@@ -6,7 +6,7 @@ import sys
 import os
 
 # 添加路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from docuflow_mcp.extensions.templates import TemplateManager
 from docuflow_mcp.extensions.styles import StyleManager
@@ -17,6 +17,7 @@ def test_template_list():
     print("测试1: 列出预设模板")
     print("=" * 50)
     result = TemplateManager.list_presets()
+    assert isinstance(result, dict), "Expected dict result"
     print(f"成功: {result['success']}")
     print(f"模板数量: {result['count']}")
     for preset in result['presets']:

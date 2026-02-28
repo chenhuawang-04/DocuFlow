@@ -8,13 +8,8 @@ import sys
 import tempfile
 import shutil
 
-# 设置输出编码
-if sys.platform == 'win32':
-    import io
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-
 # 添加项目路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from docuflow_mcp.extensions.ppt import PPTOperations
 from docuflow_mcp.core.registry import get_all_registered_tools
@@ -65,6 +60,7 @@ def test_ppt_status():
     print("=" * 60)
 
     result = PPTOperations.get_status()
+    assert isinstance(result, dict), "Expected dict result"
 
     if result.get('success'):
         print(f"python-pptx可用: {result.get('pptx_available')}")
@@ -276,6 +272,7 @@ def test_ppt_read():
 
         # 读取PPT
         result = PPTOperations.read(path=ppt_path)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 读取PPT成功")
@@ -307,6 +304,7 @@ def test_ppt_info():
 
         # 获取信息
         result = PPTOperations.info(path=ppt_path)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 获取PPT信息成功")
@@ -337,6 +335,7 @@ def test_slide_get_layouts():
 
         # 获取布局列表
         result = PPTOperations.slide_get_layouts(path=ppt_path)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 获取布局列表成功")
@@ -438,6 +437,7 @@ def test_master_list():
 
         # 获取母版列表
         result = PPTOperations.master_list(path=ppt_path)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 获取母版列表成功")
@@ -470,6 +470,7 @@ def test_master_get_info():
 
         # 获取母版详细信息
         result = PPTOperations.master_get_info(path=ppt_path, master_index=0)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 获取母版信息成功")
@@ -502,6 +503,7 @@ def test_placeholder_list():
 
         # 获取占位符列表
         result = PPTOperations.placeholder_list(path=ppt_path, slide=1)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 获取占位符列表成功")
@@ -637,6 +639,7 @@ def test_animation_list():
 
         # 列出动画
         result = PPTOperations.animation_list(path=ppt_path, slide=1)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 列出动画成功")
@@ -752,6 +755,7 @@ def test_chart_list():
 
         # 列出图表
         result = PPTOperations.chart_list(path=ppt_path, slide=1)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 列出图表成功")
@@ -786,6 +790,7 @@ def test_chart_get_data():
 
         # 获取图表数据
         result = PPTOperations.chart_get_data(path=ppt_path, slide=1, chart_index=0)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 获取图表数据成功")
@@ -858,6 +863,7 @@ def test_chart_delete():
 
         # 删除图表
         result = PPTOperations.chart_delete(path=ppt_path, slide=1, chart_index=0)
+        assert isinstance(result, dict), "Expected dict result"
 
         if result.get('success'):
             print(f"✓ 删除图表成功")
