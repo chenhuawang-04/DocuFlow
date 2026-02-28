@@ -162,7 +162,8 @@ class OCROperations:
 
     @staticmethod
     def _ocr_with_claude(image_path: str, api_key: Optional[str] = None,
-                         prompt: Optional[str] = None) -> OCRResult:
+                         prompt: Optional[str] = None,
+                         model: Optional[str] = None) -> OCRResult:
         """使用Claude Vision进行OCR"""
         if not check_import("anthropic"):
             raise ImportError("需要安装anthropic: pip install anthropic")
@@ -196,7 +197,7 @@ class OCROperations:
 
         # 调用Claude Vision API
         message = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model=model or "claude-sonnet-4-20250514",
             max_tokens=4096,
             messages=[
                 {
@@ -229,13 +230,14 @@ class OCROperations:
 
     @register_tool("ocr_image",
                    required_params=['image_path'],
-                   optional_params=['lang', 'engine', 'api_key', 'prompt'])
+                   optional_params=['lang', 'engine', 'api_key', 'prompt', 'model'])
     @staticmethod
     def ocr_image(image_path: str,
                   lang: str = 'auto',
                   engine: str = 'auto',
                   api_key: Optional[str] = None,
-                  prompt: Optional[str] = None) -> Dict[str, Any]:
+                  prompt: Optional[str] = None,
+                  model: Optional[str] = None) -> Dict[str, Any]:
         """
         OCR识别单张图片
 
@@ -265,11 +267,11 @@ class OCROperations:
                     # 如果置信度低且Claude可用，使用Claude增强
                     if result.confidence < 0.6 and check_import("anthropic"):
                         try:
-                            result = OCROperations._ocr_with_claude(image_path, api_key, prompt)
+                            result = OCROperations._ocr_with_claude(image_path, api_key, prompt, model)
                         except (RuntimeError, ValueError, OSError):
                             pass  # 保持Tesseract结果
                 elif check_import("anthropic"):
-                    result = OCROperations._ocr_with_claude(image_path, api_key, prompt)
+                    result = OCROperations._ocr_with_claude(image_path, api_key, prompt, model)
                 else:
                     return {"success": False, "error": "没有可用的OCR引擎（需要Tesseract或anthropic）"}
 
@@ -281,7 +283,7 @@ class OCROperations:
             elif engine == 'claude':
                 if not check_import("anthropic"):
                     return {"success": False, "error": "需要安装anthropic: pip install anthropic"}
-                result = OCROperations._ocr_with_claude(image_path, api_key, prompt)
+                result = OCROperations._ocr_with_claude(image_path, api_key, prompt, model)
 
             else:
                 return {"success": False, "error": f"未知引擎: {engine}"}
@@ -299,7 +301,7 @@ class OCROperations:
 
     @register_tool("ocr_pdf",
                    required_params=['pdf_path'],
-                   optional_params=['pages', 'lang', 'engine', 'dpi', 'api_key', 'prompt'])
+                   optional_params=['pages', 'lang', 'engine', 'dpi', 'api_key', 'prompt', 'model'])
     @staticmethod
     def ocr_pdf(pdf_path: str,
                 pages: Optional[List[int]] = None,
@@ -307,7 +309,8 @@ class OCROperations:
                 engine: str = 'auto',
                 dpi: int = 200,
                 api_key: Optional[str] = None,
-                prompt: Optional[str] = None) -> Dict[str, Any]:
+                prompt: Optional[str] = None,
+                model: Optional[str] = None) -> Dict[str, Any]:
         """
         OCR识别PDF文档（支持扫描件）
 
@@ -361,7 +364,8 @@ class OCROperations:
                         lang=lang,
                         engine=engine,
                         api_key=api_key,
-                        prompt=prompt
+                        prompt=prompt,
+                        model=model
                     )
 
                     if ocr_result.get("success"):
@@ -403,7 +407,7 @@ class OCROperations:
 
     @register_tool("ocr_to_docx",
                    required_params=['source', 'output_path'],
-                   optional_params=['lang', 'engine', 'dpi', 'api_key', 'prompt', 'title'])
+                   optional_params=['lang', 'engine', 'dpi', 'api_key', 'prompt', 'title', 'model'])
     @staticmethod
     def ocr_to_docx(source: str,
                     output_path: str,
@@ -412,7 +416,8 @@ class OCROperations:
                     dpi: int = 200,
                     api_key: Optional[str] = None,
                     prompt: Optional[str] = None,
-                    title: Optional[str] = None) -> Dict[str, Any]:
+                    title: Optional[str] = None,
+                    model: Optional[str] = None) -> Dict[str, Any]:
         """
         OCR识别后直接生成Word文档
 
@@ -444,7 +449,8 @@ class OCROperations:
                     engine=engine,
                     dpi=dpi,
                     api_key=api_key,
-                    prompt=prompt
+                    prompt=prompt,
+                    model=model
                 )
                 if not ocr_result.get("success"):
                     return ocr_result
@@ -457,7 +463,8 @@ class OCROperations:
                     lang=lang,
                     engine=engine,
                     api_key=api_key,
-                    prompt=prompt
+                    prompt=prompt,
+                    model=model
                 )
                 if not ocr_result.get("success"):
                     return ocr_result
