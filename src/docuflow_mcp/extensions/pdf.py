@@ -111,7 +111,10 @@ class PDFOperations:
 
                 # 确定要提取的页码
                 if pages:
-                    page_indices = [p - 1 for p in pages if 1 <= p <= total_pages]
+                    invalid = [p for p in pages if p < 1 or p > total_pages]
+                    if invalid:
+                        return {"success": False, "error": f"页码超出范围(1-{total_pages}): {invalid}"}
+                    page_indices = [p - 1 for p in pages]
                 else:
                     page_indices = list(range(total_pages))
 
@@ -178,7 +181,10 @@ class PDFOperations:
 
                 # 确定要提取的页码
                 if pages:
-                    page_indices = [p - 1 for p in pages if 1 <= p <= total_pages]
+                    invalid = [p for p in pages if p < 1 or p > total_pages]
+                    if invalid:
+                        return {"success": False, "error": f"页码超出范围(1-{total_pages}): {invalid}"}
+                    page_indices = [p - 1 for p in pages]
                 else:
                     page_indices = list(range(total_pages))
 
@@ -269,7 +275,10 @@ class PDFOperations:
 
                 # 确定要提取的页码
                 if pages:
-                    page_indices = [p - 1 for p in pages if 1 <= p <= total_pages]
+                    invalid = [p for p in pages if p < 1 or p > total_pages]
+                    if invalid:
+                        return {"success": False, "error": f"页码超出范围(1-{total_pages}): {invalid}"}
+                    page_indices = [p - 1 for p in pages]
                 else:
                     page_indices = list(range(total_pages))
 
@@ -362,7 +371,7 @@ class PDFOperations:
                                 # 尝试获取页码
                                 try:
                                     page_num = reader.get_destination_page_number(item) + 1
-                                except Exception:
+                                except (ValueError, KeyError, AttributeError):
                                     pass
 
                             outline_items.append({
@@ -370,7 +379,7 @@ class PDFOperations:
                                 "page": page_num,
                                 "level": level
                             })
-                        except Exception:
+                        except (TypeError, AttributeError, KeyError):
                             pass
 
             if reader.outline:
@@ -419,9 +428,8 @@ class PDFOperations:
 
             # 创建输出目录
             output_dir = os.path.dirname(output_path)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
             writer = PdfWriter()
             total_pages = 0
 
@@ -556,21 +564,24 @@ class PDFOperations:
             total_pages = len(reader.pages)
             writer = PdfWriter()
 
-            # 验证页码并提取
+            # 校验页码范围
+            invalid = [p for p in pages if p < 1 or p > total_pages]
+            if invalid:
+                return {"success": False, "error": f"页码超出范围(1-{total_pages}): {invalid}"}
+
+            # 提取有效页面
             extracted = []
             for page_num in pages:
-                if 1 <= page_num <= total_pages:
-                    writer.add_page(reader.pages[page_num - 1])
-                    extracted.append(page_num)
+                writer.add_page(reader.pages[page_num - 1])
+                extracted.append(page_num)
 
             if not extracted:
                 return {"success": False, "error": "没有有效的页码"}
 
             # 创建输出目录
             output_dir = os.path.dirname(output_path)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
             with open(output_path, 'wb') as f:
                 writer.write(f)
 
@@ -620,7 +631,10 @@ class PDFOperations:
 
             # 确定要旋转的页码
             if pages:
-                rotate_indices = set(p - 1 for p in pages if 1 <= p <= total_pages)
+                invalid = [p for p in pages if p < 1 or p > total_pages]
+                if invalid:
+                    return {"success": False, "error": f"页码超出范围(1-{total_pages}): {invalid}"}
+                rotate_indices = set(p - 1 for p in pages)
             else:
                 rotate_indices = set(range(total_pages))
 
@@ -637,9 +651,8 @@ class PDFOperations:
 
             # 创建输出目录
             output_dir = os.path.dirname(output_path)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
             with open(output_path, 'wb') as f:
                 writer.write(f)
 
@@ -682,11 +695,13 @@ class PDFOperations:
             writer = PdfWriter()
             total_pages = len(reader.pages)
 
-            # 要删除的页码索引
-            delete_indices = set(p - 1 for p in pages if 1 <= p <= total_pages)
+            # 校验页码范围
+            invalid = [p for p in pages if p < 1 or p > total_pages]
+            if invalid:
+                return {"success": False, "error": f"页码超出范围(1-{total_pages}): {invalid}"}
 
-            if not delete_indices:
-                return {"success": False, "error": "没有有效的页码可删除"}
+            # 要删除的页码索引
+            delete_indices = set(p - 1 for p in pages)
 
             # 复制不删除的页面
             kept_pages = []
@@ -704,9 +719,8 @@ class PDFOperations:
 
             # 创建输出目录
             output_dir = os.path.dirname(output_path)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
             with open(output_path, 'wb') as f:
                 writer.write(f)
 
@@ -760,7 +774,10 @@ class PDFOperations:
 
             # 确定要添加水印的页码
             if pages:
-                watermark_indices = set(p - 1 for p in pages if 1 <= p <= total_pages)
+                invalid = [p for p in pages if p < 1 or p > total_pages]
+                if invalid:
+                    return {"success": False, "error": f"页码超出范围(1-{total_pages}): {invalid}"}
+                watermark_indices = set(p - 1 for p in pages)
             else:
                 watermark_indices = set(range(total_pages))
 
@@ -794,7 +811,7 @@ class PDFOperations:
                         )
                         writer.add_annotation(page_number=i, annotation=annotation)
                         watermarked_count += 1
-                    except Exception:
+                    except (ValueError, TypeError, AttributeError):
                         # 如果注释方式失败，跳过
                         pass
 
@@ -804,9 +821,8 @@ class PDFOperations:
 
             # 创建输出目录
             output_dir = os.path.dirname(output_path)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
             with open(output_path, 'wb') as f:
                 writer.write(f)
 
@@ -859,15 +875,17 @@ class PDFOperations:
 
             # 创建输出目录
             output_dir = os.path.dirname(word_path)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
             # 提取表格
             with pdfplumber.open(pdf_path) as pdf:
                 total_pages = len(pdf.pages)
 
                 if pages:
-                    page_indices = [p - 1 for p in pages if 1 <= p <= total_pages]
+                    invalid = [p for p in pages if p < 1 or p > total_pages]
+                    if invalid:
+                        return {"success": False, "error": f"页码超出范围(1-{total_pages}): {invalid}"}
+                    page_indices = [p - 1 for p in pages]
                 else:
                     page_indices = list(range(total_pages))
 
@@ -903,7 +921,7 @@ class PDFOperations:
                     table = doc.add_table(rows=rows, cols=cols)
                     try:
                         table.style = table_style
-                    except Exception:
+                    except (KeyError, ValueError):
                         table.style = 'Table Grid'
 
                     for r_idx, row in enumerate(table_data):
@@ -962,15 +980,17 @@ class PDFOperations:
 
             # 创建输出目录
             output_dir = os.path.dirname(excel_path)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
             # 提取表格
             with pdfplumber.open(pdf_path) as pdf:
                 total_pages = len(pdf.pages)
 
                 if pages:
-                    page_indices = [p - 1 for p in pages if 1 <= p <= total_pages]
+                    invalid = [p for p in pages if p < 1 or p > total_pages]
+                    if invalid:
+                        return {"success": False, "error": f"页码超出范围(1-{total_pages}): {invalid}"}
+                    page_indices = [p - 1 for p in pages]
                 else:
                     page_indices = list(range(total_pages))
 
@@ -1065,9 +1085,8 @@ class PDFOperations:
             # 如果指定了输出路径，保存文件
             if output_path:
                 output_dir = os.path.dirname(output_path)
-                if output_dir and not os.path.exists(output_dir):
-                    os.makedirs(output_dir)
-
+                if output_dir:
+                    os.makedirs(output_dir, exist_ok=True)
                 with open(output_path, 'w', encoding='utf-8') as f:
                     f.write(text)
 
@@ -1236,9 +1255,8 @@ class PDFOperations:
 
             # 创建输出目录
             output_dir = os.path.dirname(output_path)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
             if format == 'docx':
                 # 生成Word文档
                 try:
@@ -1408,7 +1426,10 @@ class PDFOperations:
 
                 # 确定要处理的页码
                 if pages:
-                    page_indices = [p - 1 for p in pages if 1 <= p <= total_pages]
+                    invalid = [p for p in pages if p < 1 or p > total_pages]
+                    if invalid:
+                        return {"success": False, "error": f"页码超出范围(1-{total_pages}): {invalid}"}
+                    page_indices = [p - 1 for p in pages]
                 else:
                     page_indices = list(range(total_pages))
 
@@ -1458,19 +1479,18 @@ class PDFOperations:
                             data = contents.get_data().decode('latin-1', errors='ignore')
                             if old_text in data:
                                 new_data = data.replace(old_text, new_text)
-                                # 注意：直接修改内容流可能导致问题
-                                # 这是简化实现
                                 replacement_count += data.count(old_text)
-                except Exception:
+                                # 写回修改后的内容流
+                                contents.set_data(new_data.encode('latin-1'))
+                except (AttributeError, UnicodeDecodeError, KeyError):
                     pass
 
                 writer.add_page(page)
 
             # 创建输出目录
             out_dir = os.path.dirname(output_path)
-            if out_dir and not os.path.exists(out_dir):
-                os.makedirs(out_dir)
-
+            if out_dir:
+                os.makedirs(out_dir, exist_ok=True)
             # 写入文件
             with open(output_path, 'wb') as f:
                 writer.write(f)
@@ -1556,7 +1576,10 @@ class PDFOperations:
                 total_pages = len(pdf.pages)
 
                 if pages:
-                    page_indices = [p - 1 for p in pages if 1 <= p <= total_pages]
+                    invalid = [p for p in pages if p < 1 or p > total_pages]
+                    if invalid:
+                        return {"success": False, "error": f"页码超出范围(1-{total_pages}): {invalid}"}
+                    page_indices = [p - 1 for p in pages]
                 else:
                     page_indices = list(range(total_pages))
 
@@ -1635,9 +1658,8 @@ class PDFOperations:
 
             # 创建输出目录
             out_dir = os.path.dirname(output_path)
-            if out_dir and not os.path.exists(out_dir):
-                os.makedirs(out_dir)
-
+            if out_dir:
+                os.makedirs(out_dir, exist_ok=True)
             with open(output_path, 'wb') as f:
                 writer.write(f)
 
@@ -1749,9 +1771,8 @@ class PDFOperations:
 
             # 创建输出目录
             out_dir = os.path.dirname(output_path)
-            if out_dir and not os.path.exists(out_dir):
-                os.makedirs(out_dir)
-
+            if out_dir:
+                os.makedirs(out_dir, exist_ok=True)
             with open(output_path, 'wb') as f:
                 writer.write(f)
 
@@ -1827,9 +1848,8 @@ class PDFOperations:
 
             # 创建输出目录
             out_dir = os.path.dirname(output_path)
-            if out_dir and not os.path.exists(out_dir):
-                os.makedirs(out_dir)
-
+            if out_dir:
+                os.makedirs(out_dir, exist_ok=True)
             with open(output_path, 'wb') as f:
                 writer.write(f)
 
@@ -1896,9 +1916,8 @@ class PDFOperations:
 
             # 创建输出目录
             out_dir = os.path.dirname(output_path)
-            if out_dir and not os.path.exists(out_dir):
-                os.makedirs(out_dir)
-
+            if out_dir:
+                os.makedirs(out_dir, exist_ok=True)
             with open(output_path, 'wb') as f:
                 writer.write(f)
 
@@ -2051,9 +2070,11 @@ class PDFOperations:
                     })
 
             # 用 None 填写所有页面（pypdf 会自动遍历所有页面）
+            filled_count = 0
             try:
                 writer.update_page_form_field_values(None, fields, auto_regenerate=True)
-            except Exception:
+                filled_count = len(fields)
+            except (TypeError, KeyError, AttributeError):
                 # 回退到逐页填写
                 for page_num in range(len(writer.pages)):
                     try:
@@ -2061,14 +2082,17 @@ class PDFOperations:
                             writer.pages[page_num],
                             fields
                         )
-                    except Exception:
+                        filled_count += 1
+                    except (TypeError, KeyError, AttributeError):
                         pass
+
+            if filled_count == 0:
+                return {"success": False, "error": "所有表单字段填写均失败"}
 
             # 创建输出目录
             out_dir = os.path.dirname(output_path)
-            if out_dir and not os.path.exists(out_dir):
-                os.makedirs(out_dir)
-
+            if out_dir:
+                os.makedirs(out_dir, exist_ok=True)
             with open(output_path, 'wb') as f:
                 writer.write(f)
 

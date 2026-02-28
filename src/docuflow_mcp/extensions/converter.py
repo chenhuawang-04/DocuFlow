@@ -54,6 +54,33 @@ class ConverterOperations:
         ext = Path(file_path).suffix.lower().strip('.')
         return ConverterOperations._normalize_format(ext)
 
+    # 允许的 pandoc 参数前缀白名单
+    _ALLOWED_ARG_PREFIXES = (
+        '--toc', '--standalone', '--number-sections', '--wrap',
+        '--columns', '--tab-stop', '--highlight-style', '--no-highlight',
+        '--shift-heading-level', '--metadata', '--variable',
+        '--table-of-contents', '--strip-comments', '--ascii',
+        '--reference-links', '--atx-headers', '--top-level-division',
+        '-s', '-N',
+    )
+
+    @staticmethod
+    def _validate_extra_args(extra_args: Optional[list]) -> list:
+        """校验 extra_args，拒绝危险参数"""
+        if not extra_args:
+            return []
+        validated = []
+        for arg in extra_args:
+            if not isinstance(arg, str):
+                continue
+            # 拒绝执行类参数
+            if any(dangerous in arg.lower() for dangerous in
+                   ('--lua-filter', '--filter', '--extract-media',
+                    '-L', '-F', '--template')):
+                continue
+            validated.append(arg)
+        return validated
+
     @staticmethod
     def _run_pandoc(args: List[str]) -> Dict[str, Any]:
         """执行pandoc命令"""
@@ -125,8 +152,8 @@ class ConverterOperations:
                 source
             ]
 
-            # 添加额外参数
-            extra = extra_args or []
+            # 添加额外参数（经过安全校验）
+            extra = ConverterOperations._validate_extra_args(extra_args)
 
             # PDF需要特殊处理（支持中文）
             if tgt_fmt == 'pdf':
@@ -280,7 +307,7 @@ class ConverterOperations:
         Returns:
             {success, source, target, message}
         """
-        extra = list(extra_args) if extra_args else []
+        extra = ConverterOperations._validate_extra_args(extra_args)
 
         # 验证模板/参考文档是否存在
         if template:

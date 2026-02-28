@@ -91,9 +91,8 @@ class PPTOperations:
 
             # 创建目录
             dir_path = os.path.dirname(path)
-            if dir_path and not os.path.exists(dir_path):
-                os.makedirs(dir_path)
-
+            if dir_path:
+                os.makedirs(dir_path, exist_ok=True)
             # 保存文件
             prs.save(path)
 
@@ -403,9 +402,8 @@ class PPTOperations:
 
             # 创建输出目录
             out_dir = os.path.dirname(output_path)
-            if out_dir and not os.path.exists(out_dir):
-                os.makedirs(out_dir)
-
+            if out_dir:
+                os.makedirs(out_dir, exist_ok=True)
             merged_prs.save(output_path)
 
             total = len(merged_prs.slides)

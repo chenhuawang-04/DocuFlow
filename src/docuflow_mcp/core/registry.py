@@ -103,12 +103,15 @@ def dispatch_tool(name: str, args: dict) -> dict:
         'template', 'path1', 'path2', 'html_source',
         'source', 'target', 'reference_doc', 'css',
     }
+    # 允许 HTML 内容（非路径）的参数名
+    _HTML_CONTENT_PARAMS = {'html_source', 'html_sources'}
+
     try:
         for param_name in _PATH_PARAMS:
             if param_name in args and isinstance(args[param_name], str):
                 val = args[param_name]
-                # Skip if the value looks like HTML content, not a path
-                if val.strip().startswith('<'):
+                # Skip if the param accepts HTML content and value looks like HTML
+                if param_name in _HTML_CONTENT_PARAMS and val.strip().startswith('<'):
                     continue
                 args[param_name] = validate_path(val)
     except PathValidationError as e:

@@ -266,7 +266,7 @@ class OCROperations:
                     if result.confidence < 0.6 and check_import("anthropic"):
                         try:
                             result = OCROperations._ocr_with_claude(image_path, api_key, prompt)
-                        except Exception:
+                        except (RuntimeError, ValueError, OSError):
                             pass  # 保持Tesseract结果
                 elif check_import("anthropic"):
                     result = OCROperations._ocr_with_claude(image_path, api_key, prompt)
@@ -498,9 +498,8 @@ class OCROperations:
 
             # 保存文档
             output_dir = os.path.dirname(output_path)
-            if output_dir and not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-
+            if output_dir:
+                os.makedirs(output_dir, exist_ok=True)
             doc.save(output_path)
 
             return {

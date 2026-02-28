@@ -10,6 +10,7 @@ build/
 
 # Virtual environments
 .venv/
+.venv-pack/
 venv/
 env/
 
@@ -25,6 +26,9 @@ logs/
 
 # Secrets — never commit API keys
 image_gen_config.json
+.env
+*.key
+*.pem
 
 # OS
 .DS_Store

@@ -7,8 +7,13 @@ Provides style creation and management functionality
 import json
 from typing import Dict, Any, Optional
 
-from docx import Document
-from docx.enum.style import WD_STYLE_TYPE
+try:
+    from docx import Document
+    from docx.enum.style import WD_STYLE_TYPE
+except ImportError:
+    Document = None
+    WD_STYLE_TYPE = None
+
 from docuflow_mcp.document import parse_size, parse_color, get_alignment
 from docuflow_mcp.core.registry import register_tool
 
@@ -16,12 +21,21 @@ from docuflow_mcp.core.registry import register_tool
 class StyleManager:
     """Style management operations"""
 
+    @staticmethod
+    def _check_docx():
+        if Document is None:
+            return {"success": False, "error": "需要安装 python-docx: pip install python-docx"}
+        return None
+
     @register_tool("style_create", required_params=["path", "style_name"], optional_params=["style_type", "base_style", "font_config", "paragraph_config"])
     @staticmethod
     def create_style(path: str, style_name: str, style_type: str = "paragraph",
                      base_style: Optional[str] = None, font_config: Optional[Dict] = None,
                      paragraph_config: Optional[Dict] = None) -> Dict[str, Any]:
         """Create a custom style"""
+        err = StyleManager._check_docx()
+        if err:
+            return err
         doc = Document(path)
 
         # Map style type
@@ -94,6 +108,9 @@ class StyleManager:
     def modify_style(path: str, style_name: str, font_config: Optional[Dict] = None,
                      paragraph_config: Optional[Dict] = None) -> Dict[str, Any]:
         """Modify an existing style"""
+        err = StyleManager._check_docx()
+        if err:
+            return err
         doc = Document(path)
 
         try:
@@ -141,6 +158,9 @@ class StyleManager:
     @staticmethod
     def export_styles(path: str, output_path: Optional[str] = None) -> Dict[str, Any]:
         """Export styles to JSON"""
+        err = StyleManager._check_docx()
+        if err:
+            return err
         doc = Document(path)
 
         styles_data = {}
@@ -207,6 +227,9 @@ class StyleManager:
     @staticmethod
     def import_styles(path: str, styles_json: str) -> Dict[str, Any]:
         """Import styles from JSON"""
+        err = StyleManager._check_docx()
+        if err:
+            return err
         doc = Document(path)
 
         try:
@@ -272,6 +295,9 @@ class StyleManager:
     @staticmethod
     def copy_style(path: str, source_style: str, new_style_name: str) -> Dict[str, Any]:
         """Copy an existing style to create a new style"""
+        err = StyleManager._check_docx()
+        if err:
+            return err
         doc = Document(path)
 
         try:
@@ -338,6 +364,9 @@ class StyleManager:
     @staticmethod
     def delete_style(path: str, style_name: str) -> Dict[str, Any]:
         """Delete a custom style"""
+        err = StyleManager._check_docx()
+        if err:
+            return err
         doc = Document(path)
 
         try:
@@ -370,6 +399,9 @@ class StyleManager:
     @staticmethod
     def get_style_info(path: str, style_name: str) -> Dict[str, Any]:
         """Get detailed information about a style"""
+        err = StyleManager._check_docx()
+        if err:
+            return err
         doc = Document(path)
 
         try:

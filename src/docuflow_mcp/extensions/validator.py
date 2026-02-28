@@ -5,11 +5,38 @@ Provides format validation and auto-fix functionality
 """
 
 import json
+import re
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 from docx import Document
-from docx.shared import Pt, Cm
+from docx.shared import Pt, Cm, Inches, Emu
 from docuflow_mcp.core.registry import register_tool
+
+# 度量单位解析正则
+_MEASURE_RE = re.compile(r'^([0-9]*\.?[0-9]+)\s*(cm|in|pt|mm|emu)?$', re.IGNORECASE)
+
+
+def _parse_measurement(value: str) -> int:
+    """将度量字符串转换为 EMU（docx 内部单位）。
+
+    支持: '2.54cm', '1in', '72pt', '25.4mm', '914400emu', '2.54'(默认cm)
+    """
+    m = _MEASURE_RE.match(value.strip())
+    if not m:
+        raise ValueError(f"无法解析度量值: {value!r}")
+    num = float(m.group(1))
+    unit = (m.group(2) or 'cm').lower()
+    if unit == 'cm':
+        return Cm(num)
+    elif unit == 'in':
+        return Inches(num)
+    elif unit == 'pt':
+        return Pt(num)
+    elif unit == 'mm':
+        return Cm(num / 10)
+    elif unit == 'emu':
+        return int(num)
+    raise ValueError(f"不支持的单位: {unit}")
 
 
 class FormatValidator:
@@ -41,7 +68,7 @@ class FormatValidator:
 
         # Parse tolerance (default 0.1cm)
         tolerance_str = expected.get('tolerance', '0.1cm')
-        tolerance = Cm(float(tolerance_str.replace('cm', '')))
+        tolerance = _parse_measurement(tolerance_str)
 
         margins = {
             'top': (section.top_margin, expected.get('top')),
@@ -52,7 +79,7 @@ class FormatValidator:
 
         for margin_name, (actual, expected_str) in margins.items():
             if expected_str:
-                expected_val = Cm(float(expected_str.replace('cm', '')))
+                expected_val = _parse_measurement(expected_str)
                 diff = abs(actual - expected_val)
 
                 if diff > tolerance:
@@ -73,7 +100,7 @@ class FormatValidator:
         section = doc.sections[0]
 
         if 'width' in expected:
-            expected_width = Cm(float(expected['width'].replace('cm', '')))
+            expected_width = _parse_measurement(expected['width'])
             if abs(section.page_width - expected_width) > Cm(0.1):
                 issues.append({
                     'type': 'page_width',
@@ -83,7 +110,7 @@ class FormatValidator:
                 })
 
         if 'height' in expected:
-            expected_height = Cm(float(expected['height'].replace('cm', '')))
+            expected_height = _parse_measurement(expected['height'])
             if abs(section.page_height - expected_height) > Cm(0.1):
                 issues.append({
                     'type': 'page_height',

@@ -113,6 +113,14 @@ def _request_chat_completion(
             location = exc.headers.get("Location")
             if location:
                 redirected_url = urljoin(api_url, location)
+                # 安全检查：防止重定向到不同域名泄漏 API Key
+                from urllib.parse import urlparse
+                orig_host = urlparse(api_url).hostname
+                redir_host = urlparse(redirected_url).hostname
+                if orig_host != redir_host:
+                    raise RuntimeError(
+                        f"API 重定向到不同域名 ({redir_host})，已阻止以防 API Key 泄漏"
+                    ) from exc
                 return _request_chat_completion(
                     redirected_url, api_key, payload, timeout, ssl_context, redirects_remaining - 1
                 )
