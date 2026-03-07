@@ -8,11 +8,18 @@ import sys
 import tempfile
 import shutil
 
+import pytest
+
 # 添加src路径
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from docuflow_mcp.extensions.converter import ConverterOperations
 from docuflow_mcp.core.registry import get_all_registered_tools
+
+requires_pandoc = pytest.mark.skipif(
+    shutil.which("pandoc") is None,
+    reason="pandoc not installed",
+)
 
 
 def test_tool_registration():
@@ -62,6 +69,7 @@ def test_get_formats():
     assert result.get('success', False), "获取格式列表失败"
 
 
+@requires_pandoc
 def test_markdown_to_html():
     """测试Markdown转HTML"""
     print("\n" + "=" * 60)
@@ -123,6 +131,7 @@ def test_markdown_to_html():
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+@requires_pandoc
 def test_markdown_to_docx():
     """测试Markdown转Word"""
     print("\n" + "=" * 60)
@@ -176,6 +185,7 @@ def test_markdown_to_docx():
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+@requires_pandoc
 def test_batch_conversion():
     """测试批量转换"""
     print("\n" + "=" * 60)

@@ -1455,32 +1455,45 @@ def get_all_tools():
         # ============================================================
         Tool(
             name="ocr_image",
-            description="OCR识别单张图片中的文字（支持中英日韩等多语言）",
+            description="Run OCR on a single image file.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "image_path": {
                         "type": "string",
-                        "description": "图片文件路径（支持png/jpg/tiff/bmp等）"
+                        "description": "Image file path (png/jpg/tiff/bmp/webp)."
                     },
                     "lang": {
                         "type": "string",
-                        "description": "识别语言（auto/chinese/english/japanese等），默认auto",
+                        "description": "OCR language, such as auto/chinese/english/japanese.",
                         "default": "auto"
                     },
                     "engine": {
                         "type": "string",
-                        "enum": ["auto", "tesseract", "claude"],
-                        "description": "OCR引擎（auto自动选择，tesseract本地免费，claude AI增强）",
+                        "enum": ["auto", "tesseract", "completion", "claude"],
+                        "description": "OCR engine. claude is kept as a compatibility alias for completion.",
                         "default": "auto"
                     },
                     "api_key": {
                         "type": "string",
-                        "description": "Claude API密钥（可选，也可用ANTHROPIC_API_KEY环境变量）"
+                        "description": "Completion API key. You can pass it directly or set it in ocr_config.json."
                     },
                     "prompt": {
                         "type": "string",
-                        "description": "自定义Claude识别提示词（仅claude引擎有效）"
+                        "description": "Optional OCR prompt used by the completion engine."
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Optional completion model name."
+                    },
+                    "api_url": {
+                        "type": "string",
+                        "description": "Optional completion API URL."
+                    },
+                    "timeout": {
+                        "type": "integer",
+                        "description": "Completion request timeout in seconds.",
+                        "default": 120
                     }
                 },
                 "required": ["image_path"]
@@ -1489,42 +1502,55 @@ def get_all_tools():
 
         Tool(
             name="ocr_pdf",
-            description="OCR识别PDF文档（支持扫描件/图像PDF）",
+            description="Run OCR on a scanned or image-based PDF.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "pdf_path": {
                         "type": "string",
-                        "description": "PDF文件路径"
+                        "description": "PDF file path."
                     },
                     "pages": {
                         "type": "array",
                         "items": {"type": "integer"},
-                        "description": "要识别的页码列表（从1开始，不指定则识别全部）"
+                        "description": "1-based page numbers to process. Omit to process all pages."
                     },
                     "lang": {
                         "type": "string",
-                        "description": "识别语言",
+                        "description": "OCR language.",
                         "default": "auto"
                     },
                     "engine": {
                         "type": "string",
-                        "enum": ["auto", "tesseract", "claude"],
-                        "description": "OCR引擎",
+                        "enum": ["auto", "tesseract", "completion", "claude"],
+                        "description": "OCR engine. claude is kept as a compatibility alias for completion.",
                         "default": "auto"
                     },
                     "dpi": {
                         "type": "integer",
-                        "description": "PDF转图片的DPI（越高越清晰但越慢，默认200）",
+                        "description": "PDF to image DPI. Higher DPI improves quality but is slower.",
                         "default": 200
                     },
                     "api_key": {
                         "type": "string",
-                        "description": "Claude API密钥"
+                        "description": "Completion API key. You can pass it directly or set it in ocr_config.json."
                     },
                     "prompt": {
                         "type": "string",
-                        "description": "自定义识别提示词"
+                        "description": "Optional OCR prompt used by the completion engine."
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Optional completion model name."
+                    },
+                    "api_url": {
+                        "type": "string",
+                        "description": "Optional completion API URL."
+                    },
+                    "timeout": {
+                        "type": "integer",
+                        "description": "Completion request timeout in seconds.",
+                        "default": 120
                     }
                 },
                 "required": ["pdf_path"]
@@ -1533,45 +1559,58 @@ def get_all_tools():
 
         Tool(
             name="ocr_to_docx",
-            description="OCR识别后直接生成Word文档（一步到位）",
+            description="Run OCR and write the extracted text into a Word document.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "source": {
                         "type": "string",
-                        "description": "源文件路径（PDF或图片）"
+                        "description": "Source file path. Supported: PDF or image."
                     },
                     "output_path": {
                         "type": "string",
-                        "description": "输出Word文档路径（.docx）"
+                        "description": "Output Word document path (.docx)."
                     },
                     "lang": {
                         "type": "string",
-                        "description": "识别语言",
+                        "description": "OCR language.",
                         "default": "auto"
                     },
                     "engine": {
                         "type": "string",
-                        "enum": ["auto", "tesseract", "claude"],
-                        "description": "OCR引擎",
+                        "enum": ["auto", "tesseract", "completion", "claude"],
+                        "description": "OCR engine. claude is kept as a compatibility alias for completion.",
                         "default": "auto"
                     },
                     "dpi": {
                         "type": "integer",
-                        "description": "PDF转换DPI",
+                        "description": "PDF to image DPI.",
                         "default": 200
                     },
                     "api_key": {
                         "type": "string",
-                        "description": "Claude API密钥"
+                        "description": "Completion API key. You can pass it directly or set it in ocr_config.json."
                     },
                     "prompt": {
                         "type": "string",
-                        "description": "自定义识别提示词"
+                        "description": "Optional OCR prompt used by the completion engine."
                     },
                     "title": {
                         "type": "string",
-                        "description": "生成文档的标题"
+                        "description": "Optional document title."
+                    },
+                    "model": {
+                        "type": "string",
+                        "description": "Optional completion model name."
+                    },
+                    "api_url": {
+                        "type": "string",
+                        "description": "Optional completion API URL."
+                    },
+                    "timeout": {
+                        "type": "integer",
+                        "description": "Completion request timeout in seconds.",
+                        "default": 120
                     }
                 },
                 "required": ["source", "output_path"]

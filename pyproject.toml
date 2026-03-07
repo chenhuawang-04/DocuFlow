@@ -93,5 +93,5 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "requires_tesseract: requires Tesseract OCR installed",
     "requires_pandoc: requires pandoc installed",
-    "requires_api_key: requires ANTHROPIC_API_KEY set",
+    "requires_api_key: requires OCR completion API configuration",
 ]

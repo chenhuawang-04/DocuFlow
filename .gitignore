@@ -26,6 +26,7 @@ logs/
 
 # Secrets — never commit API keys
 image_gen_config.json
+ocr_config.json
 .env
 *.key
 *.pem

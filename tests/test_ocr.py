@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from docuflow_mcp.extensions.ocr import OCROperations
 from docuflow_mcp.core.registry import get_all_registered_tools
+from docuflow_mcp.tools import get_all_tools
 
 
 def test_tool_registration():
@@ -138,9 +139,12 @@ def test_ocr_image():
             print("✓ 图片OCR测试通过!")
         else:
             error = result.get('error', '未知错误')
-            if 'Tesseract' in error and 'anthropic' in error:
+            if 'Tesseract' in error and 'completion API' in error:
                 print(f"跳过: 没有可用的OCR引擎")
                 pytest.skip("没有可用的OCR引擎")
+            if "WinError 10013" in error or "?????" in error:
+                print("??: ?????????????")
+                pytest.skip("?????????????")
             print(f"✗ 识别失败: {error}")
             assert False, "识别失败: ..."
 
@@ -231,10 +235,11 @@ def main():
         print("  Windows: https://github.com/UB-Mannheim/tesseract/wiki")
         print("  添加到PATH后重启终端")
 
-    if not engines.get('claude', {}).get('available'):
-        print("\n提示: 安装anthropic可启用Claude Vision增强OCR")
-        print("  pip install anthropic")
-        print("  设置环境变量: ANTHROPIC_API_KEY=your_key")
+    completion_info = engines.get('completion', {})
+    if completion_info.get('available') and not completion_info.get('api_key_set'):
+        print("\n??: ?? completion API ????? OCR")
+        print("  ????: api_key=your_key")
+        print("  ?????: ocr_config.json ?? api_key / api_url / model / timeout")
 
     deps = status.get('dependencies', {})
     if not deps.get('pdf2image', {}).get('available'):
@@ -248,3 +253,23 @@ def main():
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
+
+
+def test_ocr_tool_schema_completion_params():
+    """OCR MCP schema should expose completion parameters."""
+    tools = {tool.name: tool for tool in get_all_tools()}
+    for name in ('ocr_image', 'ocr_pdf', 'ocr_to_docx'):
+        props = tools[name].inputSchema['properties']
+        assert 'model' in props
+        assert 'api_url' in props
+        assert 'timeout' in props
+        assert 'completion' in props['engine']['enum']
+
+
+def test_completion_api_key_resolution():
+    """completion API key should support direct config and preserve precedence."""
+    assert OCROperations._get_completion_api_key({'api_key': ' config-key '}) == 'config-key'
+    assert OCROperations._get_completion_api_key({'api_key': 'config-key'}, api_key='arg-key') == 'arg-key'
+
+    with pytest.raises(ValueError):
+        OCROperations._get_completion_api_key({})
