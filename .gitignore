@@ -26,7 +26,6 @@ logs/
 
 # Secrets — never commit API keys
 image_gen_config.json
-ocr_config.json
 .env
 *.key
 *.pem
@@ -46,6 +45,13 @@ test_*.pdf
 validation_rules/
 custom_templates/
 pytest_err.txt
+.pytest_tmp*.xml
+
+# Archives
+*.zip
+
+# OCR config (may contain API info)
+ocr_config.json
 
 # Temp files from Claude Code worktrees
 tmpclaude-*

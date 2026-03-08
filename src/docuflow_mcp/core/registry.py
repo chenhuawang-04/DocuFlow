@@ -102,6 +102,8 @@ def dispatch_tool(name: str, args: dict) -> dict:
         'path', 'output_path', 'ppt_path', 'input_path',
         'template', 'path1', 'path2', 'html_source',
         'source', 'target', 'reference_doc', 'css',
+        'pdf_path', 'image_path', 'excel_path', 'word_path',
+        'output_dir', 'base_path',
     }
     # 列表路径参数（每个元素都需要校验）
     _LIST_PATH_PARAMS = {
