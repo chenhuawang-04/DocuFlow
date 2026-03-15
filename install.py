@@ -276,15 +276,36 @@ def install_agent():
 
     # ── 1. CLAUDE.md — project-level agent instructions ──
     claude_md = DOCUFLOW_DIR / "CLAUDE.md"
-    if claude_md.exists():
-        info(f"CLAUDE.md exists ({claude_md.stat().st_size} bytes)")
+    if not claude_md.exists():
+        # Try restoring from git first
+        try:
+            run(f"git -C \"{DOCUFLOW_DIR}\" checkout HEAD -- CLAUDE.md",
+                capture=True, check=True)
+            info(f"CLAUDE.md restored from git ({claude_md.stat().st_size} bytes)")
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            warn("CLAUDE.md not found — creating from template")
+            _write_agent_instructions(claude_md)
+            info("CLAUDE.md created")
     else:
-        warn("CLAUDE.md not found — creating from template")
-        _write_agent_instructions(claude_md)
-        info("CLAUDE.md created")
+        info(f"CLAUDE.md exists ({claude_md.stat().st_size} bytes)")
 
-    # ── 2. Check project-level skills ──
+    # ── 2. Check project-level skills (restore from git if missing) ──
     PROJECT_COMMANDS_DIR.mkdir(parents=True, exist_ok=True)
+    missing_skills = [
+        name for name in SKILL_NAMES
+        if not (PROJECT_COMMANDS_DIR / f"{name}.md").exists()
+    ]
+    if missing_skills:
+        # Try restoring from git (files may have been deleted in working tree)
+        try:
+            run(
+                f"git -C \"{DOCUFLOW_DIR}\" checkout HEAD -- .claude/commands/",
+                capture=True, check=True,
+            )
+            info(f"Restored {len(missing_skills)} skill(s) from git")
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            pass  # Not a git repo or files not tracked — skip silently
+
     for skill_name in SKILL_NAMES:
         skill_file = PROJECT_COMMANDS_DIR / f"{skill_name}.md"
         if skill_file.exists():
