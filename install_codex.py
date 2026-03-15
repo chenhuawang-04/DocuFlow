@@ -434,8 +434,9 @@ def run(cmd, capture=False, check=True) -> subprocess.CompletedProcess:
         args = shlex.split(cmd, posix=(os.name != 'nt'))
     else:
         args = list(cmd)
+    # Windows needs shell=True to find .cmd/.bat wrappers (e.g. codex.cmd)
     return subprocess.run(
-        args, shell=False, capture_output=capture, text=True, check=check
+        args, shell=(os.name == 'nt'), capture_output=capture, text=True, check=check
     )
 
 
