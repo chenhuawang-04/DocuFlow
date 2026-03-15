@@ -100,8 +100,14 @@ def header(msg: str):
 
 
 def run(cmd, capture=False, check=True) -> subprocess.CompletedProcess:
+    if os.name == 'nt':
+        # Windows: pass raw string to shell so cmd.exe handles quoting
+        return subprocess.run(
+            cmd if isinstance(cmd, str) else subprocess.list2cmdline(cmd),
+            shell=True, capture_output=capture, text=True, check=check
+        )
     if isinstance(cmd, str):
-        args = shlex.split(cmd, posix=(os.name != 'nt'))
+        args = shlex.split(cmd)
     else:
         args = list(cmd)
     return subprocess.run(
