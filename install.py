@@ -258,8 +258,23 @@ def configure_mcp_server():
                     data = json.load(f)
             else:
                 data = {}
+
+            # Register MCP server
             data.setdefault("mcpServers", {})
             data["mcpServers"]["docuflow"] = mcp_config
+
+            # Merge tool permissions so DocuFlow works outside this project
+            try:
+                tool_names = get_tool_names()
+                allow_list = [f"mcp__docuflow__{n}" for n in tool_names]
+                existing = data.get("permissions", {}).get("allow", [])
+                merged = sorted(set(existing) | set(allow_list))
+                data.setdefault("permissions", {})
+                data["permissions"]["allow"] = merged
+                info(f"Global permissions: {len(tool_names)} tools auto-allowed")
+            except Exception as e:
+                warn(f"Failed to set global permissions: {e}")
+
             with open(global_settings, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
                 f.write("\n")
@@ -600,13 +615,24 @@ def uninstall():
         try:
             with open(global_settings, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            if "mcpServers" in data and "docuflow" in data["mcpServers"]:
+            has_mcp = "mcpServers" in data and "docuflow" in data["mcpServers"]
+            has_perms = any(
+                p.startswith("mcp__docuflow__")
+                for p in data.get("permissions", {}).get("allow", [])
+            )
+            if has_mcp or has_perms:
                 if ask_yes_no(f"Also remove from global settings?", default=True):
-                    del data["mcpServers"]["docuflow"]
+                    if has_mcp:
+                        del data["mcpServers"]["docuflow"]
+                    if has_perms:
+                        data["permissions"]["allow"] = [
+                            p for p in data["permissions"]["allow"]
+                            if not p.startswith("mcp__docuflow__")
+                        ]
                     with open(global_settings, "w", encoding="utf-8") as f:
                         json.dump(data, f, indent=2, ensure_ascii=False)
                         f.write("\n")
-                    info("Removed from global settings")
+                    info("Removed MCP server and permissions from global settings")
         except Exception:
             pass
 
